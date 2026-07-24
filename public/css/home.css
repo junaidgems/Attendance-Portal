@@ -1,0 +1,712 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.welcome-body {
+    font-family: 'Inter', sans-serif !important;
+    min-height: 100vh !important;
+    background: #0a0e1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+}
+/* ========================================
+   MAIN WRAPPER - GRADIENT CIRCLES
+   ======================================== */
+
+.main-wrapper {
+    margin-left: var(--sidebar-width);
+    transition: var(--transition);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow-x: hidden;
+    background: var(--bg-body);
+}
+
+/* ===== GRADIENT CIRCLES (Background Decoration) ===== */
+.main-wrapper::before,
+.main-wrapper::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+    transition: all 0.6s ease;
+}
+
+/* Circle 1 - Top Right */
+.main-wrapper::before {
+    width: 500px;
+    height: 500px;
+    top: -150px;
+    right: -100px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.10) 0%, rgba(59, 130, 246, 0.03) 40%, transparent 70%);
+}
+
+/* Circle 2 - Bottom Left */
+.main-wrapper::after {
+    width: 400px;
+    height: 400px;
+    bottom: -100px;
+    left: -80px;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, rgba(139, 92, 246, 0.02) 40%, transparent 70%);
+}
+
+/* ===== EXTRA CIRCLE (Middle Right - Subtle) ===== */
+.main-wrapper .gradient-circle-3 {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    top: 40%;
+    right: -60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ===== DARK THEME - Circles ===== */
+[data-theme="dark"] .main-wrapper::before {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.03) 40%, transparent 70%);
+}
+
+[data-theme="dark"] .main-wrapper::after {
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.02) 40%, transparent 70%);
+}
+
+[data-theme="dark"] .main-wrapper .gradient-circle-3 {
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.06) 0%, transparent 70%);
+}
+
+/* ========================================
+   CONTENT (Keeps content above circles)
+   ======================================== */
+.content-wrapper {
+    flex: 1;
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+}
+
+
+@media (max-width: 768px) {
+    .main-wrapper::before {
+        width: 300px;
+        height: 300px;
+        top: -80px;
+        right: -60px;
+    }
+    .main-wrapper::after {
+        width: 250px;
+        height: 250px;
+        bottom: -60px;
+        left: -50px;
+    }
+    .main-wrapper .gradient-circle-3 {
+        display: none;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-wrapper::before,
+    .main-wrapper::after {
+        display: none;
+    }
+}
+/* ----- MAIN WRAPPER (Glass) ----- */
+.portal-wrapper {
+    width: 100%;
+    max-width: 1200px;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-radius: 40px;
+    padding: 50px 60px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 
+        0 30px 80px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    position: relative;
+    overflow: hidden;
+}
+
+
+/* ----- LEFT CIRCLE GRADIENT (Blue/Purple) ----- */
+.portal-wrapper .circle-left {
+    position: absolute;
+    left: -200px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(139, 92, 246, 0.08) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ----- RIGHT CIRCLE GRADIENT (Blue/Cyan) ----- */
+.portal-wrapper .circle-right {
+    position: absolute;
+    right: -200px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 500px;
+    height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.12) 0%, rgba(6, 182, 212, 0.06) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ----- TOP SMALL CIRCLE (Optional Accent) ----- */
+.portal-wrapper .circle-top {
+    position: absolute;
+    right: -100px;
+    top: -100px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ----- BOTTOM SMALL CIRCLE (Optional Accent) ----- */
+.portal-wrapper .circle-bottom {
+    position: absolute;
+    left: -100px;
+    bottom: -100px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(6, 182, 212, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* ----- TOP GLOW LINE ----- */
+.portal-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.15), transparent);
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* ----- LEFT GLOW LINE ----- */
+.portal-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 10%;
+    left: 0;
+    bottom: 10%;
+    width: 1px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.10), transparent, rgba(255, 255, 255, 0.04));
+    pointer-events: none;
+    z-index: 2;
+}
+
+/* ----- BRAND SECTION ----- */
+.brand-section {
+    position: relative;
+    z-index: 1;
+}
+
+.brand-icon {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    border-radius: 14px;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 900;
+    margin-right: 12px;
+    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.30);
+}
+
+.brand-name {
+    font-size: 26px;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+}
+
+.brand-name .highlight {
+    background: linear-gradient(135deg, #60a5fa, #2563eb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.brand-sub {
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+}
+
+/* ----- USER SECTION (Glass) ----- */
+.user-section {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 10px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    display: inline-block;
+    text-align: right;
+}
+
+.user-name {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 15px;
+}
+
+.user-email {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 13px;
+}
+
+.user-badge {
+    background: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+    padding: 2px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid rgba(59, 130, 246, 0.06);
+    display: inline-block;
+    margin-left: 6px;
+}
+
+/* ----- HERO TEXT ----- */
+.hero-text {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin: 28px 0 40px;
+}
+
+.hero-text .badge-top {
+    display: inline-block;
+    background: rgba(59, 130, 246, 0.06);
+    color: #60a5fa;
+    padding: 6px 22px;
+    border-radius: 30px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border: 1px solid rgba(59, 130, 246, 0.04);
+    margin-bottom: 16px;
+}
+
+.hero-text h1 {
+    font-size: 42px;
+    font-weight: 900;
+    color: #ffffff;
+    line-height: 1.15;
+    margin-bottom: 12px;
+}
+
+.hero-text h1 .gradient {
+    background: linear-gradient(135deg, #93bbfc, #3b82f6, #1d4ed8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.hero-text p {
+    color: rgba(255, 255, 255, 0.40);
+    font-size: 18px;
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.7;
+}
+
+/* ========================================
+   GLASS CARDS
+   ======================================== */
+
+.glass-card {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 24px;
+    padding: 28px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.20),
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.03),
+        inset 0 0 12px 4px rgba(255, 255, 255, 0.02);
+    transition: all 0.35s ease;
+    cursor: pointer;
+    min-height: 280px;
+    overflow: hidden;
+}
+
+/* ----- TOP GLOW LINE ----- */
+.glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 15%;
+    right: 15%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.20), transparent);
+    pointer-events: none;
+}
+
+/* ----- LEFT GLOW LINE ----- */
+.glass-card::after {
+    content: '';
+    position: absolute;
+    top: 15%;
+    left: 0;
+    bottom: 15%;
+    width: 1px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent, rgba(255, 255, 255, 0.04));
+    pointer-events: none;
+}
+
+.glass-card:hover {
+    transform: translateY(-6px);
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 
+        0 20px 60px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.04),
+        inset 0 0 12px 4px rgba(255, 255, 255, 0.05);
+}
+
+/* ----- Module Icons ----- */
+.module-icon {
+    display: inline-block;
+    width: 48px;
+    height: 48px;
+    line-height: 48px;
+    text-align: center;
+    border-radius: 14px;
+    font-size: 22px;
+}
+
+.module-icon.primary {
+    background: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
+}
+
+.module-icon.success {
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
+}
+
+.module-icon.warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+}
+
+/* ----- Module Tags ----- */
+.tag-live {
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.08);
+    color: #34d399;
+    padding: 2px 14px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(16, 185, 129, 0.04);
+    float: right;
+}
+
+.tag-coming {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(255, 255, 255, 0.20);
+    padding: 2px 14px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    float: right;
+}
+
+/* ----- Module Content ----- */
+.glass-card h4 {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 18px;
+    margin-bottom: 4px;
+    margin-top: 10px;
+}
+
+.glass-card p {
+        color: rgb(255 255 255 / 73%);
+    font-size: 14px;
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+.glass-card .features-tags {
+    margin: 10px 0 14px;
+}
+
+.glass-card .features-tags span {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.03);
+    color: rgb(255 255 255 / 72%);
+    padding: 3px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    margin: 2px 2px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.glass-card .module-link {
+    color: #60a5fa;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.glass-card .module-link:hover {
+    color: #93bbfc;
+    letter-spacing: 0.3px;
+}
+
+.glass-card .module-link i {
+    transition: all 0.3s ease;
+}
+
+.glass-card:hover .module-link i {
+    transform: translateX(4px);
+}
+
+.glass-card .coming-text {
+    color: rgba(255, 255, 255, 0.20);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* ----- BOTTOM FEATURES (Glass) ----- */
+.bottom-features {
+    position: relative;
+    z-index: 1;
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.bottom-features .feature-item {
+    text-align: center;
+}
+
+.bottom-features .feature-item i {
+    font-size: 20px;
+    color: #60a5fa;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.bottom-features .feature-item span {
+        color: rgb(255 255 255 / 52%);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 992px) {
+    .portal-wrapper {
+        padding: 30px 28px;
+        border-radius: 28px;
+    }
+
+    .hero-text h1 {
+        font-size: 32px;
+    }
+
+    .hero-text p {
+        font-size: 16px;
+    }
+
+    .glass-card {
+        min-height: auto;
+        padding: 22px 18px;
+    }
+
+    .brand-name {
+        font-size: 22px;
+    }
+
+    .user-section {
+        padding: 8px 16px;
+        text-align: center;
+        display: block;
+    }
+
+    .user-badge {
+        display: block;
+        margin-left: 0;
+        margin-top: 4px;
+    }
+    
+    .portal-wrapper .circle-left,
+    .portal-wrapper .circle-right {
+        width: 300px;
+        height: 300px;
+    }
+}
+
+@media (max-width: 768px) {
+    .brand-section {
+        text-align: center;
+    }
+
+    .user-section {
+        text-align: center;
+        margin-top: 10px;
+        width: 100%;
+    }
+
+    .hero-text h1 {
+        font-size: 28px;
+    }
+
+    .hero-text p {
+        font-size: 15px;
+    }
+
+    .bottom-features .feature-item span {
+        font-size: 12px;
+    }
+    
+    .portal-wrapper .circle-left,
+    .portal-wrapper .circle-right {
+        width: 200px;
+        height: 200px;
+        display: none;
+    }
+}
+
+@media (max-width: 576px) {
+    body {
+        padding: 15px;
+    }
+
+    .portal-wrapper {
+        padding: 20px 16px;
+        border-radius: 20px;
+    }
+
+    .hero-text h1 {
+        font-size: 22px;
+    }
+
+    .hero-text p {
+        font-size: 13px;
+    }
+
+    .brand-icon {
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 17px;
+        margin-right: 8px;
+    }
+
+    .brand-name {
+        font-size: 18px;
+    }
+
+    .brand-sub {
+        font-size: 11px;
+    }
+
+    .user-name {
+        font-size: 13px;
+    }
+
+    .user-email {
+        font-size: 11px;
+    }
+
+    .glass-card {
+        padding: 16px 14px;
+        min-height: auto;
+    }
+
+    .glass-card h4 {
+        font-size: 16px;
+    }
+
+    .glass-card p {
+        font-size: 13px;
+    }
+
+    .glass-card .features-tags span {
+        font-size: 10px;
+        padding: 2px 10px;
+    }
+
+    .hero-text .badge-top {
+        font-size: 10px;
+        padding: 4px 14px;
+    }
+
+    .bottom-features .feature-item i {
+        font-size: 17px;
+    }
+
+    .bottom-features .feature-item span {
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 400px) {
+    .hero-text h1 {
+        font-size: 18px;
+    }
+
+    .brand-name {
+        font-size: 16px;
+    }
+
+    .brand-icon {
+        width: 34px;
+        height: 34px;
+        line-height: 34px;
+        font-size: 14px;
+    }
+}

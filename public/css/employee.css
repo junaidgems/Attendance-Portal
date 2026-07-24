@@ -1,0 +1,407 @@
+
+        /* ===== EMPLOYEE PAGE ===== */
+        .glass-card {
+            background: var(--bg-topbar);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            transition: var(--transition);
+        }
+
+        .glass-card:hover {
+            box-shadow: var(--shadow);
+        }
+
+        /* Search Bar */
+        .search-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .search-bar .form-control {
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 16px;
+            color: var(--text-primary);
+            font-size: 14px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-bar .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-bar .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-primary-glass {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-primary-glass:hover {
+            opacity: 0.85;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-outline-glass {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-outline-glass:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary);
+        }
+
+        .btn-outline-glass:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary);
+            color: var(--text-primary);
+        }
+
+        .btn-outline-glass.danger:hover {
+            border-color: #ef4444;
+            color: #ef4444;
+            background: #fee2e2;
+        }
+
+        
+        /* ===== TABLE ===== */
+        .table-wrap {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .table-wrap table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 700px;
+        }
+
+        .table-wrap th {
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border-color);
+            background: var(--hover-bg);
+        }
+
+        .table-wrap td {
+            padding: 14px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .table-wrap tr:hover td {
+            background: var(--hover-bg);
+        }
+
+        .table-wrap .employee-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            margin-right: 10px;
+        }
+
+        .table-wrap .employee-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .table-wrap .employee-role {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .btn-icon {
+            background: transparent;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        .btn-icon:hover {
+            background: var(--hover-bg);
+            color: var(--primary);
+        }
+
+        .btn-icon.danger:hover {
+            background: #fee2e2;
+            color: #ef4444;
+        }
+
+        /* ========================================
+               GLASSMORPHISM MODAL
+            ======================================== */
+        .modal-glass .modal-content {
+            background: var(--bg-topbar);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-glass .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 28px;
+        }
+
+        .modal-glass .modal-header .modal-title {
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--text-primary);
+        }
+
+        .modal-glass .modal-header .btn-close {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .modal-glass .modal-body {
+            padding: 28px;
+        }
+
+        .modal-glass .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 28px;
+        }
+
+        .modal-backdrop.show {
+            z-index: 1040;
+        }
+
+        .modal.show {
+            z-index: 1050;
+        }
+
+        .modal-glass .modal-content {
+            position: relative;
+            z-index: 1051;
+        }
+
+        /* Agar card ya glass element modal ke upar aa raha hai */
+        .glass-card {
+            position: relative;
+            z-index: auto;
+        }
+
+        /* Form */
+        .form-glass .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-glass .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .form-glass .form-group .form-control {
+            width: 100%;
+            padding: 10px 14px;
+            background: var(--bg-body);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: var(--transition);
+        }
+
+        .form-glass .form-group .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.08);
+        }
+
+        .form-glass .form-group .form-control::placeholder {
+            color: var(--text-muted);
+            opacity: 0.5;
+        }
+
+        .form-glass .form-group .form-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            opacity: 0.7;
+        }
+
+        .form-glass .form-group .form-hint i {
+            margin-right: 4px;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-cancel:hover {
+            background: var(--hover-bg);
+        }
+
+        .btn-save {
+            background: var(--primary);
+            border: none;
+            color: #fff;
+            padding: 10px 28px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-save:hover {
+            opacity: 0.85;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Grace info */
+        .grace-info {
+            background: var(--hover-bg);
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .grace-info i {
+            color: var(--primary);
+            margin-right: 6px;
+        }
+
+        .employe-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 4px;
+        }
+
+        .employe-info .employee-avatar {
+            margin-right: 10px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .employe-info>div {
+            min-width: 0;
+        }
+
+        .employee-name {
+            display: block;
+            line-height: 1.3;
+        }
+
+        .employee-role {
+            display: block;
+            line-height: 1.3;
+        }
+
+        /* ===== RESPONSIVE ===== */
+
+@media(max-width:1024px){
+       .head-btns {
+        justify-content: center !important;
+        margin-top: 20px;
+    }
+
+      .table-wrap th,
+            .table-wrap td {
+              white-space: nowrap;
+              }
+
+}
+
+        @media (max-width: 768px) {
+            .search-bar .form-control {
+                min-width: 100%;
+            }
+
+            .search-bar .btn-primary-glass {
+                width: 100%;
+                text-align: center;
+            }
+
+            .modal-glass .modal-body {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .glass-card {
+                padding: 16px;
+            }
+
+            .table-wrap th,
+            .table-wrap td {
+                padding: 10px 12px;
+                white-space: nowrap;
+                font-size: 12px;
+            }
+
+            .modal-glass .modal-header {
+                padding: 16px 20px;
+            }
+
+            .modal-glass .modal-body {
+                padding: 16px;
+            }
+
+            .modal-glass .modal-footer {
+                padding: 12px 20px;
+            }
+        }
+  

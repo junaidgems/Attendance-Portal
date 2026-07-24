@@ -1,0 +1,7 @@
+/* resources/css/app.css */
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* Agar custom CSS chahiye toh neeche daalein */
+body {
+    background: #f8f9fa;
+}

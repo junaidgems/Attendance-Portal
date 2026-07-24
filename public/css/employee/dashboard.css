@@ -1,0 +1,305 @@
+
+    .greeting-card {
+        background: var(--bg-topbar);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+        box-shadow: var(--shadow);
+    }
+    .greeting-card h4 {
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .greeting-card p {
+        color: var(--text-muted);
+    }
+
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+    }
+    .stat-card {
+        background: var(--bg-topbar);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        transition: var(--transition);
+    }
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+    }
+    .stat-card .number {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--primary);
+    }
+    .stat-card .label {
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+    .stat-card .sub {
+        font-size: 12px;
+        color: var(--text-muted);
+        opacity: 0.6;
+    }
+
+    /* ===== LEAVE BALANCE ===== */
+    .leave-balance-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 14px;
+        margin: 16px 0;
+    }
+    .leave-card {
+        background: var(--bg-topbar);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        transition: var(--transition);
+        cursor: pointer;
+    }
+    .leave-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+        border-color: var(--primary);
+    }
+    .leave-card .leave-icon {
+        font-size: 28px;
+        display: block;
+        margin-bottom: 4px;
+    }
+    .leave-card .leave-icon.annual { color: #3b82f6; }
+    .leave-card .leave-icon.sick { color: #22c55e; }
+    .leave-card .leave-icon.casual { color: #f59e0b; }
+
+    .leave-card .leave-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text-secondary);
+    }
+    .leave-card .leave-balance {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .leave-card .leave-total {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ===== QUICK ACTIONS ===== */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+    }
+    .quick-action {
+        background: var(--bg-topbar);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
+    }
+    .quick-action:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow);
+        border-color: var(--primary);
+    }
+    .quick-action i {
+        font-size: 28px;
+        color: var(--primary);
+        display: block;
+        margin-bottom: 6px;
+    }
+    .quick-action h6 {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    .quick-action p {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin: 0;
+    }
+
+    /* ===== MONTHLY STATS ===== */
+    .monthly-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 12px;
+        margin-top: 12px;
+    }
+    .monthly-item {
+        background: var(--hover-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 12px;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    .monthly-item:hover {
+        border-color: var(--primary);
+    }
+    .monthly-item .num {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+    .monthly-item .label {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+
+    /* ===== NOTIFICATIONS ===== */
+    .notif-card {
+        background: var(--bg-topbar);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 16px;
+    }
+    .notif-card .notif-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .notif-card .notif-left i {
+        font-size: 24px;
+        color: var(--text-muted);
+    }
+    .notif-card .notif-left .notif-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+    .notif-card .notif-left .notif-count {
+        font-size: 12px;
+        color: var(--text-muted);
+        background: var(--hover-bg);
+        padding: 2px 12px;
+        border-radius: 12px;
+    }
+    .notif-card .notif-right {
+        font-size: 13px;
+        color: var(--text-muted);
+        opacity: 0.6;
+    }
+
+    /* ===== RECENT DAYS TABLE ===== */
+    .recent-table {
+        background: var(--bg-topbar);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 12px;
+    }
+    .recent-table table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    }
+    .recent-table th {
+        padding: 10px 14px;
+        text-align: left;
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 11px;
+        text-transform: uppercase;
+        background: var(--hover-bg);
+    }
+    .recent-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }
+    .recent-table tr:last-child td {
+        border-bottom: none;
+    }
+    .recent-table .status-badge {
+        padding: 2px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+        display: inline-block;
+    }
+    .recent-table .status-badge.absent {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    .recent-table .status-badge.present {
+        background: #d1fae5;
+        color: #059669;
+    }
+    .recent-table .status-badge.late {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    [data-theme="dark"] .recent-table .status-badge.absent {
+        background: #7f1d1d;
+        color: #f87171;
+    }
+    [data-theme="dark"] .recent-table .status-badge.present {
+        background: #064e3b;
+        color: #34d399;
+    }
+    [data-theme="dark"] .recent-table .status-badge.late {
+        background: #78350f;
+        color: #fbbf24;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 16px 0 12px;
+    }
+    .section-header h6 {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0;
+    }
+    .section-header .sub {
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+tbody, td, tfoot, th, thead, tr {
+    white-space: nowrap;
+}
+    @media (max-width: 576px) {
+        .stat-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+        .leave-balance-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+        .quick-actions {
+            grid-template-columns: 1fr 1fr;
+        }
+        .monthly-grid {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+        .notif-card {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }

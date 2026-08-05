@@ -88,18 +88,24 @@
             @endif
 
             <!-- Login Form -->
+
             <form method="POST" action="{{ route('login.post') }}">
                 @csrf
 
                 <div class="form-group">
                     <label for="email">Email</label>
-                    <input type="email" id="email" name="email" placeholder="faraz@gems.edu"
-                         required>
+                    <input type="email" id="email" name="email" placeholder="faraz@gems.edu" required>
                 </div>
 
+                {{-- ===== PASSWORD WITH EYE ICON ===== --}}
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    <div class="password-input-wrapper">
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                        <button type="button" class="password-toggle-btn" onclick="togglePassword()">
+                            <i class="bi bi-eye" id="passwordIcon"></i>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" class="btn-login">
@@ -107,13 +113,27 @@
                 </button>
             </form>
 
+
         </div>
 
     </div>
 
-
     <script>
-     
+        function togglePassword() {
+            var passwordInput = document.getElementById('password');
+            var icon = document.getElementById('passwordIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        }
+    </script>
+    <script>
+
         history.pushState(null, null, location.href);
         window.onpopstate = function () {
             history.go(1);

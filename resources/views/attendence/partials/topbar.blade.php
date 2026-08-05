@@ -20,9 +20,7 @@
             <i class="bi bi-moon-fill"></i>
         </button>
 
-        <!-- ========================================== -->
         <!-- NOTIFICATIONS - Bootstrap Dropdown -->
-        <!-- ========================================== -->
         <div class="dropdown">
             <button class="notification-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
                 aria-expanded="false">
@@ -47,44 +45,63 @@
             </ul>
         </div>
 
-        <!-- ========================================== -->
         <!-- PROFILE - Bootstrap Dropdown -->
-        <!-- ========================================== -->
-        <div class="dropdown">
-            <button class="dropdown-toggle-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                <div class="avatar-sm">
-                    {{ substr(Auth::user()->name ?? 'U', 0, 2) }}
-                </div>
-                <span class="user-name-top">{{ Auth::user()->name ?? 'User' }}</span>
-                <i class="bi bi-chevron-down chevron"></i>
-            </button>
-
-            <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                    <a class="dropdown-item" href="#">
-                        <i class="bi bi-person"></i> Profile
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" href="#">
-                        <i class="bi bi-gear"></i> Settings
-                    </a>
-                </li>
-                <li>
-                    <hr class="dropdown-divider">
-                </li>
-                <li>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="dropdown-item"
-                            style="color:#ef4444; width:100%; border:none; background:transparent;">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </button>
-                    </form>
-                </li>
-            </ul>
+     <div class="dropdown">
+    <button class="dropdown-toggle-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+        aria-expanded="false">
+        <div class="avatar-sm">
+            {{ substr(Auth::user()->name ?? 'U', 0, 2) }}
         </div>
+        <span class="user-name-top">{{ Auth::user()->name ?? 'User' }}</span>
+        <i class="bi bi-chevron-down chevron"></i>
+    </button>
+
+ <ul class="dropdown-menu dropdown-menu-end">
+    
+    <li>
+        @if(Auth::user()->role->name == 'administrator')
+            <a class="dropdown-item" href="{{ route('admin.profile') }}">
+                <i class="bi bi-person"></i> Profile
+            </a>
+        @elseif(Auth::user()->role->name == 'Employee' || Auth::user()->role->name == 'employee')
+            <a class="dropdown-item" href="{{ route('employee.profile') }}">
+                <i class="bi bi-person"></i> Profile
+            </a>
+        @elseif(Auth::user()->role->name == 'Line_Manager')
+            <a class="dropdown-item" href="{{ route('line_manager.profile') }}">
+                <i class="bi bi-person"></i> Profile
+            </a>
+        @elseif(Auth::user()->role->name == 'manager' || Auth::user()->role->name == 'Manager')
+            <a class="dropdown-item" href="{{ route('manager.profile') }}">
+                <i class="bi bi-person"></i> Profile
+            </a>
+        @elseif(Auth::user()->role->name == 'director' || Auth::user()->role->name == 'Director')
+            <a class="dropdown-item" href="{{ route('director.profile') }}">
+                <i class="bi bi-person"></i> Profile
+            </a>
+        @else
+            <a class="dropdown-item" href="#">
+                <i class="bi bi-person"></i> Profile
+            </a>
+        @endif
+    </li>
+
+    <li>
+        <hr class="dropdown-divider">
+    </li>
+
+    <li>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="dropdown-item"
+                style="color:#ef4444; width:100%; border:none; background:transparent;">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </form>
+    </li>
+
+</ul>
+</div>
 
     </div>
 </header>

@@ -101,9 +101,8 @@ class employeecontrollers extends Controller
     return redirect()->back()->with('success', 'Employee created successfully!');
 }
 
-    /**
-     * Show the form for editing the specified employee.
-     */
+    /*** Show the form for editing the specified employee.*/
+
     public function edit($id)
     {
         $employee = Employee::with(['user', 'role', 'department'])->findOrFail($id);
@@ -122,9 +121,8 @@ class employeecontrollers extends Controller
         ]);
     }
 
-    /**
-     * Update the specified employee.
-     */
+    /* Update the specified employee.*/
+
   public function update(Request $request, $id)
 {
     $employee = Employee::findOrFail($id);
@@ -187,9 +185,7 @@ class employeecontrollers extends Controller
     return redirect()->back()->with('success', 'Employee updated successfully!');
 }
 
-    /**
-     * Remove the specified employee.
-     */
+    /* Remove the specified employee. */
     public function destroy($id)
     {
         $employee = Employee::findOrFail($id);

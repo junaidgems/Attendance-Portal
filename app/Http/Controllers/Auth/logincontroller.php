@@ -19,9 +19,9 @@ class LoginController extends Controller
             }
             if ($role == 'administrator') {
                 return redirect()->route('admin.dashboard');
-            } elseif ($role == 'director') {
+            } elseif ($role == 'Director') {
                 return redirect()->route('director.dashboard');
-            } elseif ($role == 'manager') {
+            } elseif ($role == 'Manager') {
                 return redirect()->route('manager.dashboard');
             } elseif ($role == 'line_manager') {
                 return redirect()->route('line_manager.dashboard');
@@ -46,36 +46,38 @@ class LoginController extends Controller
             $user = Auth::user();
 
             $role = $user->role ? $user->role->name : 'login';
-
+            
             if ($role == 'administrator') {
                 return redirect()->route('admin.dashboard');
-            } elseif ($role == 'director') {
+            } elseif ($role == 'Director') {
                 return redirect()->route('director.dashboard');
-            } elseif ($role == 'manager') {
+            } elseif ($role == 'Manager') {
                 return redirect()->route('manager.dashboard');
-            } elseif ($role == 'line_manager') {
+            } elseif ($role == 'Line_Manager') {
                 return redirect()->route('line_manager.dashboard');
             } elseif ($role == 'employee') {
                 return redirect()->route('employee.dashboard');
             } else {
                 return redirect()->route('login');
             }
+
+
         }
 
         return back()->with('error', 'Invalid email or password!');
     }
 
-public function logout(Request $request)
-{
-    Auth::logout();
-    session()->flush();
-    $request->session()->invalidate();
-    $request->session()->regenerateToken();
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        session()->flush();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
 
-    return redirect()->route('login')
-        ->with('success', 'Logged out successfully!')
-        ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
-        ->header('Pragma', 'no-cache')
-        ->header('Expires', '0');
-}
+        return redirect()->route('login')
+            ->with('success', 'Logged out successfully!')
+            ->header('Cache-Control', 'no-cache, no-store, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', '0');
+    }
 }

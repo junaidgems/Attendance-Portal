@@ -66,8 +66,19 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 document.addEventListener('DOMContentLoaded', function() {
     const currentPath = window.location.pathname;
+    
     document.querySelectorAll('.sidebar-menu .nav-link').forEach(function(link) {
-        if (link.getAttribute('href') === currentPath) {
+        const href = link.getAttribute('href');
+        
+        if (!href || href === '#') return;
+        
+        // ✅ Remove trailing slash
+        const cleanHref = href.replace(/\/$/, '');
+        const cleanCurrent = currentPath.replace(/\/$/, '');
+        
+        // ✅ Check if current path matches or starts with href
+        if (cleanHref === cleanCurrent || 
+            (cleanHref !== '/' && cleanCurrent.startsWith(cleanHref + '/'))) {
             link.classList.add('active');
         }
     });

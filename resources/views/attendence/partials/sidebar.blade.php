@@ -1,6 +1,4 @@
-<!-- ======================================== -->
 <!-- SIDEBAR                                  -->
-<!-- ======================================== -->
 <nav class="sidebar">
 
     <!-- Brand -->
@@ -16,50 +14,6 @@
         <!-- ===== MAIN ===== -->
         <li class="menu-label">Main</li>
         <!-- ADMIN DASHBOARD                           -->
-
-        <!-- EMPLOYEE DASHBOARD                        -->
-        @if(session('user_role') == 'employee')
-            <li class="nav-item">
-                <a href="{{ route('employee.dashboard') }}"
-                    class="nav-link {{ request()->routeIs('employee.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-grid-1x2"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-        @endif
-
-        <!-- MANAGER DASHBOARD                         -->
-        @if(session('user_role') == 'manager')
-            <li class="nav-item">
-                <a href="{{ route('manager.dashboard') }}"
-                    class="nav-link {{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-grid-1x2"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-        @endif
-
-        <!-- LINE MANAGER DASHBOARD                    -->
-        @if(session('user_role') == 'line-manager')
-            <li class="nav-item">
-                <a href="{{ route('line.manager.dashboard') }}"
-                    class="nav-link {{ request()->routeIs('line.manager.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-grid-1x2"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-        @endif
-
-        <!-- DIRECTOR DASHBOARD                        -->
-        @if(session('user_role') == 'director')
-            <li class="nav-item">
-                <a href="{{ route('director.dashboard') }}"
-                    class="nav-link {{ request()->routeIs('director.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-grid-1x2"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-        @endif
 
 
         <!-- ADMIN MENU                                -->
@@ -169,9 +123,15 @@
         @endif
 
 
-
         <!-- EMPLOYEE MENU                             -->
-        @if(session('user_role') == 'employee')
+        @if(Auth::user()->role->name == 'Employee')
+            <li class="nav-item">
+                <a href="{{ route('employee.dashboard') }}"
+                    class="nav-link {{ request()->routeIs('employee.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="{{ route('employee.my.attendance') }}"
                     class="nav-link {{ request()->routeIs('employee.my.attendance') ? 'active' : '' }}">
@@ -211,7 +171,15 @@
 
 
         <!-- MANAGER MENU                              -->
-        @if(session('user_role') == 'manager')
+        @if(Auth::user()->role->name == 'Manager')
+
+            <li class="nav-item">
+                <a href="{{ route('manager.dashboard') }}"
+                    class="nav-link {{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
             <li class="nav-item">
                 <a href="{{ route('manager.my.attendance') }}"
                     class="nav-link {{ request()->routeIs('manager.my.attendance') ? 'active' : '' }}">
@@ -276,12 +244,13 @@
 
 
         <!-- LINE MANAGER MENU                         -->
-        @if(session('user_role') == 'line_manager')
+
+        @if(Auth::user()->role->name == 'Line_Manager')
 
             <!-- Dashboard -->
             <li class="nav-item">
-                <a href="{{ route('line-manager.dashboard') }}"
-                    class="nav-link {{ request()->routeIs('line-manager.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('line_manager.dashboard') }}"
+                    class="nav-link {{ request()->routeIs('line_manager.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-grid-1x2"></i>
                     <span>Dashboard</span>
                 </a>
@@ -289,8 +258,8 @@
 
             <!-- My Attendance -->
             <li class="nav-item">
-                <a href="{{ route('line-manager.my.attendance') }}"
-                    class="nav-link {{ request()->routeIs('line-manager.my.attendance') ? 'active' : '' }}">
+                <a href="{{ route('line_manager.my.attendance') }}"
+                    class="nav-link {{ request()->routeIs('line_manager.my.attendance') ? 'active' : '' }}">
                     <i class="bi bi-clock-history"></i>
                     <span>My Attendance</span>
                 </a>
@@ -298,8 +267,8 @@
 
             <!-- Correction Requests -->
             <li class="nav-item">
-                <a href="{{ route('line-manager.correction.requests') }}"
-                    class="nav-link {{ request()->routeIs('line-manager.correction.requests') ? 'active' : '' }}">
+                <a href="{{ route('line_manager.correction.requests') }}"
+                    class="nav-link {{ request()->routeIs('line_manager.correction.requests') ? 'active' : '' }}">
                     <i class="bi bi-pencil-square"></i>
                     <span>Correction Requests</span>
                 </a>
@@ -307,8 +276,8 @@
 
             <!-- Leave -->
             <li class="nav-item">
-                <a href="{{ route('line-manager.leave') }}"
-                    class="nav-link {{ request()->routeIs('line-manager.leave') ? 'active' : '' }}">
+                <a href="{{ route('line_manager.leave') }}"
+                    class="nav-link {{ request()->routeIs('line_manager.leave') ? 'active' : '' }}">
                     <i class="bi bi-calendar-check"></i>
                     <span>Leave</span>
                 </a>
@@ -316,8 +285,8 @@
 
             <!-- Leave Report -->
             <li class="nav-item">
-                <a href="{{ route('line-manager.leave.report') }}"
-                    class="nav-link {{ request()->routeIs('line-manager.leave.report') ? 'active' : '' }}">
+                <a href="{{ route('line_manager.leave.report') }}"
+                    class="nav-link {{ request()->routeIs('line_manager.leave.report') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text"></i>
                     <span>Leave Report</span>
                 </a>
@@ -325,8 +294,8 @@
 
             <!-- Penalty & Waivers -->
             <li class="nav-item">
-                <a href="{{ route('line-manager.penalty.waivers') }}"
-                    class="nav-link {{ request()->routeIs('line-manager.penalty.waivers') ? 'active' : '' }}">
+                <a href="{{ route('line_manager.penalty.waivers') }}"
+                    class="nav-link {{ request()->routeIs('line_manager.penalty.waivers') ? 'active' : '' }}">
                     <i class="bi bi-shield"></i>
                     <span>Penalty &amp; Waivers</span>
                 </a>
@@ -335,21 +304,19 @@
             <!-- ===== TEAM ===== -->
             <li class="menu-label" style="margin-top: 8px;">Team</li>
 
-
-
             <!-- Team Attendance -->
             <li class="nav-item">
-                <a href="{{ route('line-manager.team.attendance') }}"
-                    class="nav-link {{ request()->routeIs('line-manager.team.attendance') ? 'active' : '' }}">
-                    <i class="bi bi-clock-history"></i>
+                <a href="{{ route('line_manager.team.attendance') }}"
+                    class="nav-link {{ request()->routeIs('line_manager.team.attendance') ? 'active' : '' }}">
+                    <i class="bi bi-people"></i>
                     <span>Team Attendance</span>
                 </a>
             </li>
 
             <!-- Approvals -->
             <li class="nav-item">
-                <a href="{{ route('line-manager.approvals') }}"
-                    class="nav-link {{ request()->routeIs('line-manager.approvals') ? 'active' : '' }}">
+                <a href="{{ route('line_manager.approvals') }}"
+                    class="nav-link {{ request()->routeIs('line_manager.approvals') ? 'active' : '' }}">
                     <i class="bi bi-check2-circle"></i>
                     <span>Approvals</span>
                 </a>
@@ -357,8 +324,8 @@
 
             <!-- Attendance Patterns -->
             <li class="nav-item">
-                <a href="{{ route('line-manager.attendance.patterns') }}"
-                    class="nav-link {{ request()->routeIs('line-manager.attendance.patterns') ? 'active' : '' }}">
+                <a href="{{ route('line_manager.attendance.patterns') }}"
+                    class="nav-link {{ request()->routeIs('line_manager.attendance.patterns') ? 'active' : '' }}">
                     <i class="bi bi-graph-up"></i>
                     <span>Attendance Patterns</span>
                 </a>
@@ -368,9 +335,15 @@
 
 
         <!-- DIRECTOR MENU                             -->
-        @if(session('user_role') == 'director')
+         @if(Auth::user()->role->name == 'Director')
 
-
+            <li class="nav-item">
+                <a href="{{ route('director.dashboard') }}"
+                    class="nav-link {{ request()->routeIs('director.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
             <!-- My Attendance -->
             <li class="nav-item">
                 <a href="{{ route('director.my.attendance') }}"
@@ -463,22 +436,22 @@
     </ul>
 
     <!-- ===== FOOTER: User + Logout ===== -->
-  <div class="sidebar-footer">
-    <div class="avatar">
-        {{ substr(Auth::user()->name ?? 'FS', 0, 2) }}
-    </div>
-    <div class="user-info">
-        <div class="user-name">{{ Auth::user()->name ?? 'Guest' }}</div>
-        <div class="user-role">
-            {{ ucfirst(str_replace('_', ' ', Auth::user()->role->name ?? 'No Role')) }}
+    <div class="sidebar-footer">
+        <div class="avatar">
+            {{ substr(Auth::user()->name ?? 'FS', 0, 2) }}
         </div>
+        <div class="user-info">
+            <div class="user-name">{{ Auth::user()->name ?? 'Guest' }}</div>
+            <div class="user-role">
+                {{ ucfirst(str_replace('_', ' ', Auth::user()->role->name ?? 'No Role')) }}
+            </div>
+        </div>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="logout-btn" title="Logout">
+                <i class="bi bi-box-arrow-right"></i>
+            </button>
+        </form>
     </div>
-    <form method="POST" action="{{ route('logout') }}">
-        @csrf
-        <button type="submit" class="logout-btn" title="Logout">
-            <i class="bi bi-box-arrow-right"></i>
-        </button>
-    </form>
-</div>
 
 </nav>

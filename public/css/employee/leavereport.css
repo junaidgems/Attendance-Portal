@@ -10,7 +10,9 @@
 .glass-card:hover {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
 }
-
+.filter-bar .btn-group {
+    gap: 10px;
+}
 .filter-bar {
     display: flex;
     flex-wrap: wrap;

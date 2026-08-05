@@ -5,9 +5,9 @@
 
 @section('content')
     <link rel="stylesheet" href="{{ asset('css/approval.css') }}">
-    <!-- ========================================== -->
+
     <!-- APPROVALS PAGE                            -->
-    <!-- ========================================== -->
+
     <div class="row">
         <div class="col-12">
             <div class="glass-card">
@@ -28,12 +28,9 @@
                     </button>
                 </div>
 
-                <!-- ========================================== -->
+                
                 <!-- TAB 1: CORRECTION REQUESTS                -->
-                <!-- ========================================== -->
-                <!-- ========================================== -->
-                <!-- TAB 1: CORRECTION REQUESTS                -->
-                <!-- ========================================== -->
+                
                 <div class="tab-content active" id="tab-corrections">
 
                     @if(count($data['corrections']) > 0)
@@ -87,9 +84,9 @@
                     @endif
 
                 </div>
-                <!-- ========================================== -->
+            
                 <!-- TAB 2: LEAVE REQUESTS                     -->
-                <!-- ========================================== -->
+            
                 <div class="tab-content" id="tab-leaves">
 
                     <div class="empty-state">
@@ -118,9 +115,9 @@
 
                 </div>
 
-                <!-- ========================================== -->
+                
                 <!-- TAB 3: DEDUCTION WAIVER REQUESTS          -->
-                <!-- ========================================== -->
+                
                 <div class="tab-content" id="tab-waivers">
 
                     <div class="empty-state">

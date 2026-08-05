@@ -129,7 +129,6 @@
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
 
-                {{-- IMPORTANT: form tag ab yahan se shuru hoga, poore modal-body ko wrap karega --}}
                 <form class="form-glass" action="{{ route('admin.employee.store') }}" method="POST">
                     @csrf
 
@@ -142,7 +141,7 @@
 
                     <div class="modal-body">
 
-                        {{-- Validation errors ka block --}}
+                        {{-- Validation errors block --}}
                         @if ($errors->any())
                             <div class="alert alert-danger">
                                 <ul class="mb-0">

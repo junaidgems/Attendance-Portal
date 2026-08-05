@@ -11,7 +11,7 @@
 
 <!-- ===== TOP BAR — Back to Dashboard ===== -->
 <div class="top-bar">
-    <a href="{{ route('line.manager.dashboard') }}" class="btn-back-glass">
+    <a href="{{ route('line_manager.dashboard') }}" class="btn-back-glass">
         <i class="bi bi-arrow-left"></i> Back to dashboard
     </a>
     <span style="font-size:13px; color:var(--text-muted);">
@@ -23,7 +23,7 @@
 <div class="row">
     <div class="col-12">
         <div class="glass-card">
-            <form method="GET" action="{{ route('line.manager.attendance.breakdown') }}">
+            <form method="GET" action="{{ route('line_manager.attendance.breakdown') }}">
                 <div class="filter-bar">
 
                     <div class="form-group">
@@ -55,7 +55,7 @@
 
                     <div class="btn-group">
                         <button type="submit" class="btn-primary-glass"><i class="bi bi-funnel"></i> Filter</button>
-                        <a href="{{ route('line.manager.attendance.breakdown') }}" class="btn-outline-glass"><i class="bi bi-arrow-counterclockwise"></i> Clear</a>
+                        <a href="{{ route('line_manager.attendance.breakdown') }}" class="btn-outline-glass"><i class="bi bi-arrow-counterclockwise"></i> Clear</a>
                         <button class="btn-outline-glass" onclick="alert('Export CSV coming soon!')"><i class="bi bi-download"></i> Export CSV</button>
                     </div>
 

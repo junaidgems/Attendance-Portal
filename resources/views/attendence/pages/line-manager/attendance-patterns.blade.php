@@ -306,7 +306,7 @@ tbody, td, tfoot, th, thead, tr {
 <div class="row">
     <div class="col-12">
         <div class="glass-card">
-            <form method="GET" action="{{ route('line-manager.attendance.patterns') }}">
+            <form method="GET" action="{{ route('line_manager.attendance.patterns') }}">
                 <div class="filter-bar">
 
                     <div class="form-group">

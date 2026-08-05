@@ -36,6 +36,9 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('attendence.pages.admin.dashboard');
     })->name('dashboard');
+    Route::get('/profile', function () {
+        return view('attendence.pages.admin.profile');
+    })->name('profile');
 
     // ===== EMPLOYEES =====
     Route::get('/employees', [employeecontrollers::class, 'index'])->name('employee');
@@ -98,7 +101,7 @@ Route::prefix('admin')->name('admin.')->middleware('auth')->group(function () {
 });
 
 
-// EMPLOYEE ROUTES                           //
+// EMPLOYEE ROUTES //
 
 Route::prefix('employee')->name('employee.')->middleware('auth')->group(function () {
 
@@ -129,6 +132,10 @@ Route::prefix('employee')->name('employee.')->middleware('auth')->group(function
     Route::get('/penalty-waivers', function () {
         return view('attendence.pages.employee.penalty-waivers');
     })->name('penalty.waivers');
+
+    Route::get('/profile', function () {
+        return view('attendence.pages.employee.profile');
+    })->name('profile');
 
 });
 
@@ -172,7 +179,13 @@ Route::prefix('manager')->name('manager.')->middleware('auth')->group(function (
     Route::get('/attendance-patterns', function () {
         return view('attendence.pages.manager.attendance-patterns');
     })->name('attendance.patterns');
-
+    // ===== ATTENDANCE BREAKDOWN =====
+    Route::get('/attendance-breakdown', function () {
+        return view('attendence.pages.manager.attendance-breakdown');
+    })->name('attendance.breakdown');
+    Route::get('/profile', function () {
+        return view('attendence.pages.manager.profile');
+    })->name('profile');
 });
 
 
@@ -181,19 +194,35 @@ Route::prefix('manager')->name('manager.')->middleware('auth')->group(function (
 Route::prefix('line-manager')->name('line_manager.')->middleware('auth')->group(function () {
 
     Route::get('/dashboard', function () {
-        return view('attendence.pages.line_manager.dashboard');
+        return view('attendence.pages.line-manager.dashboard');
     })->name('dashboard');
 
+    Route::get('/my-attendance', function () {
+        return view('attendence.pages.line-manager.my-attendance');
+    })->name('my.attendance');
+
+    Route::get('/correction-requests', function () {
+        return view('attendence.pages.line-manager.correction-requests');
+    })->name('correction.requests');
+
+    Route::get('/leave', function () {
+        return view('attendence.pages.line-manager.leave');
+    })->name('leave');
+
+    Route::get('/penalty-waivers', function () {
+        return view('attendence.pages.line-manager.penalty-waivers');
+    })->name('penalty.waivers');
+
     Route::get('/team-overview', function () {
-        return view('attendence.pages.line_manager.team-overview');
+        return view('attendence.pages.line-manager.team-overview');
     })->name('team.overview');
 
     Route::get('/team-attendance', function () {
-        return view('attendence.pages.line_manager.team-attendance');
+        return view('attendence.pages.line-manager.team-attendance');
     })->name('team.attendance');
 
     Route::get('/approvals', function () {
-        return view('attendence.pages.line_manager.approvals');
+        return view('attendence.pages.line-manager.approvals');
     })->name('approvals');
 
     Route::get('/leaves', function () {
@@ -201,9 +230,21 @@ Route::prefix('line-manager')->name('line_manager.')->middleware('auth')->group(
     })->name('leaves');
 
     Route::get('/leave-report', function () {
-        return view('attendence.pages.line_manager.leave-report');
+        return view('attendence.pages.line-manager.leave-report');
     })->name('leave.report');
 
+    Route::get('/attendance-patterns', function () {
+        return view('attendence.pages.line-manager.attendance-patterns');
+    })->name('attendance.patterns');
+
+    // ===== ATTENDANCE BREAKDOWN =====
+    Route::get('/attendance-breakdown', function () {
+        return view('attendence.pages.line-manager.attendance-breakdown');
+    })->name('attendance.breakdown');
+
+    Route::get('/profile', function () {
+        return view('attendence.pages.line-manager.profile');
+    })->name('profile');
 });
 
 
@@ -270,7 +311,9 @@ Route::prefix('director')->name('director.')->middleware('auth')->group(function
     Route::get('/leaves', function () {
         return view('attendence.pages.director.leaves');
     })->name('leaves');
-
+    Route::get('/profile', function () {
+        return view('attendence.pages.director.profile');
+    })->name('profile');
 });
 
 

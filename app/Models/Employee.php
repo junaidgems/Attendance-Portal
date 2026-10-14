@@ -593,6 +593,174 @@ class Employee extends Model
         return implode(' · ', $parts);
     }
 
+    /**
+     * One month of My Attendance (Employee / Line Manager / Manager pages): the calendar rows and the summary counts,
+     * all from attendanceDays(), so every page shows a day the same way.
+     *
+     * @return array{data: array<int, array<string, mixed>>, present: int, absent: int, late: int, early: int, half: int, missing: int, workingDaysCount: int}
+     */
+    public function monthCalendar(int $year, int $month, ?object $settings): array
+    {
+        $start = Carbon::create($year, $month, 1)->startOfMonth();
+        $holidays = DB::table('holidays')->get();
+
+        $data = $this->attendanceDays($start, $start->copy()->endOfMonth(), $settings, $holidays)
+            ->map(fn (array $day) => $this->calendarRow($day, $holidays))
+            ->values()
+            ->all();
+
+        $rows = collect($data);
+
+        return [
+            'data' => $data,
+            'present' => $rows->whereIn('status', ['Present', 'Late', 'Early Out', 'Half Day'])->count(),
+            'absent' => $rows->where('status', 'Absent')->count(),
+            'late' => $rows->where('status', 'Late')->count(),
+            'early' => $rows->where('status', 'Early Out')->count(),
+            'half' => $rows->where('status', 'Half Day')->count(),
+            'missing' => $rows->filter(fn ($d) => $d['in'] === 'Missing Punch' || $d['out'] === 'Missing Punch')->count(),
+            'workingDaysCount' => $rows->reject(fn ($d) => in_array($d['status'], ['Weekend', 'Holiday', ''], true))->count(),
+        ];
+    }
+
+    /**
+     * One My Attendance calendar row for a day from attendanceDays(). A missing punch shows as Present with
+     * "Missing Punch" in the IN or OUT column (and a correction link on the page).
+     *
+     * @param  array{date: string, status: string, waived: array<int, string>, in_progress: bool, wfh: ?string, note: ?string, record: ?object}  $day
+     * @return array{date: int, full_date: string, adjustment: ?string, day: string, status: string, in: string, out: string, net: string|float, timeline: string, wfh?: string}
+     */
+    public function calendarRow(array $day, Collection $holidays): array
+    {
+        $shown = $this->dayPresentation($day, $holidays, 'h:i A');
+        $date = Carbon::parse($day['date']);
+
+        $row = [
+            'date' => $date->day,
+            'full_date' => $day['date'],
+            'adjustment' => $day['note'],
+            'day' => $date->format('D'),
+            'status' => $shown['status'],
+            'in' => $shown['in'],
+            'out' => $shown['out'],
+            'net' => $shown['minutes'] !== null ? round($shown['minutes'] / 60, 1) : '—',
+            'timeline' => $shown['timeline'],
+        ];
+
+        if ($shown['wfh']) {
+            $row['wfh'] = $shown['wfh'];
+        }
+
+        return $row;
+    }
+
+    /**
+     * One Team Attendance table row (Manager / Line Manager / Director pages) for a day from attendanceDays().
+     * "tags" drive the page's filter buttons (present, late, early-out, half-day, absent).
+     *
+     * @param  array{date: string, status: string, waived: array<int, string>, in_progress: bool, wfh: ?string, note: ?string, record: ?object}  $day
+     * @return array{name: string, emp_id: ?string, date: string, status: string, tags: array<int, string>, in: string, out: string, net: string, net_minutes: ?int, timeline: string, timeline_class: string, wfh?: string}
+     */
+    public function teamRow(array $day, Collection $holidays): array
+    {
+        $shown = $this->dayPresentation($day, $holidays, 'H:i');
+        $status = $day['status'];
+        $minutes = $shown['minutes'];
+
+        [$tags, $class] = match (true) {
+            $status === 'Absent' => [['absent'], 'timeline-absent'],
+            $status === 'Missing Punch' => [['present', 'absent'], 'timeline-absent'],
+            $status === 'Late' => [['present', 'late'], 'timeline-late'],
+            $status === 'Early Out' => [['present', 'early-out'], 'timeline-late'],
+            $status === 'Half Day' => [['present', 'half-day'], 'timeline-late'],
+            $status === 'Present' => [['present'], 'timeline-on-time'],
+            default => [[], ''],
+        };
+
+        $row = [
+            'name' => $this->full_name,
+            'emp_id' => $this->employee_id,
+            'date' => Carbon::parse($day['date'])->format('D d M'),
+            'status' => $shown['status'],
+            'tags' => $tags,
+            'in' => $shown['in'],
+            'out' => $shown['out'],
+            'net' => $minutes !== null ? intdiv($minutes, 60).'h '.($minutes % 60).'m' : '—',
+            'net_minutes' => $minutes,
+            'timeline' => $status === 'Absent' && ! $shown['wfh'] ? 'No Punch' : $shown['timeline'],
+            'timeline_class' => $class,
+        ];
+
+        if ($shown['wfh']) {
+            $row['wfh'] = $shown['wfh'];
+        }
+
+        return $row;
+    }
+
+    /**
+     * What the attendance pages show for a day: the status label, IN / OUT times (or "Missing Punch"), worked
+     * minutes and the timeline text, with the Work From Home label added.
+     *
+     * @param  array{date: string, status: string, waived: array<int, string>, in_progress: bool, wfh: ?string, note: ?string, record: ?object}  $day
+     * @return array{status: string, in: string, out: string, minutes: ?int, timeline: string, wfh: ?string}
+     */
+    private function dayPresentation(array $day, Collection $holidays, string $timeFormat): array
+    {
+        $record = $day['record'];
+        $status = $day['status'];
+        $hasPunches = in_array($status, ['Present', 'Late', 'Early Out', 'Half Day', 'Missing Punch'], true);
+        $missingPunch = $status === 'Missing Punch';
+
+        $in = $hasPunches && $record?->check_in ? Carbon::parse($record->check_in)->format($timeFormat) : ($missingPunch ? 'Missing Punch' : '—');
+        $out = match (true) {
+            ! $hasPunches, $day['in_progress'] => '—',
+            // Only one punch, or an out punch not after the in punch: the check-out is missing
+            $missingPunch && ($record?->check_in || ! $record?->check_out) => 'Missing Punch',
+            ! $record?->check_out => 'Missing Punch',
+            default => Carbon::parse($record->check_out)->format($timeFormat),
+        };
+
+        $minutes = null;
+        if ($hasPunches && ! $missingPunch && ! $day['in_progress'] && $record?->check_in && $record->check_out) {
+            $minutes = max(0, (int) Carbon::parse($day['date'].' '.$record->check_in)->diffInMinutes(Carbon::parse($day['date'].' '.$record->check_out), false));
+        }
+
+        $holiday = $holidays->first(fn ($h) => $day['date'] >= $h->from_date && $day['date'] <= ($h->to_date ?? $h->from_date));
+
+        $timeline = match (true) {
+            $status === 'Holiday' => $holiday->name ?? 'Holiday',
+            $day['in_progress'] => 'In Progress',
+            $missingPunch => 'Missing Punch',
+            $status === 'Present' => 'On Time',
+            $status === 'Late', $status === 'Early Out', $status === 'Half Day' => $status,
+            default => '—',
+        };
+
+        // Came in on a holiday
+        if ($hasPunches && $holiday) {
+            $timeline .= ' (Holiday)';
+        }
+
+        // Approved Work From Home day: portal check-in, or approved but never checked in
+        $wfh = $day['wfh'];
+        if ($wfh && ! in_array($status, ['', 'Weekend', 'Holiday', 'On Leave'], true)) {
+            $timeline = $status === 'Absent' ? $wfh : $timeline.' · '.$wfh;
+        } else {
+            $wfh = null;
+        }
+
+        return [
+            // The pages list a missing punch under Present, with "Missing Punch" in the IN / OUT column
+            'status' => $missingPunch ? 'Present' : $status,
+            'in' => $in,
+            'out' => $out,
+            'minutes' => $minutes,
+            'timeline' => $timeline,
+            'wfh' => $wfh,
+        ];
+    }
+
     public function wfhRequests()
     {
         return $this->hasMany(WfhRequest::class);

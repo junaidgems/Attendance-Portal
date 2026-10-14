@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Manager;
 
-use App\Models\LeaveRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -77,27 +76,10 @@ class AttendancePatternController extends TeamAttendanceController
             $team = $team->where('department_id', (int) $department)->values();
         }
 
-        $records = DB::table('device_attendance')
-            ->whereIn('uid', $team->pluck('zkteco_uid')->filter())
-            ->whereBetween('date', [$from->format('Y-m-d'), $to->format('Y-m-d')])
-            ->get()
-            ->groupBy(fn ($r) => (string) $r->uid);
-
-        $leaves = LeaveRequest::whereIn('employee_id', $team->pluck('id'))
-            ->approvedAbsence()
-            ->whereDate('from_date', '<=', $to->format('Y-m-d'))
-            ->whereDate('to_date', '>=', $from->format('Y-m-d'))
-            ->get()
-            ->groupBy('employee_id');
-
         $members = [];
 
         foreach ($team as $emp) {
-            $empRecords = $emp->zkteco_uid
-                ? $records->get((string) $emp->zkteco_uid, collect())->keyBy('date')
-                : collect();
-
-            $members[] = $this->memberPattern($emp, $from, $to, $empRecords, $settings, $holidays, $leaves->get($emp->id, collect()));
+            $members[] = $this->memberPattern($emp, $from, $to, $settings, $holidays);
         }
 
         usort($members, fn ($a, $b) => [$b['watch'], $a['name']] <=> [$a['watch'], $b['name']]);
@@ -147,17 +129,15 @@ class AttendancePatternController extends TeamAttendanceController
     /**
      * @return array{name: string, emp_id: string, department: string, attendance: ?int, late: int, early: int, half: int, absent: int, leave: int, punctuality: string, avg_hours: ?float, watch: bool}
      */
-    private function memberPattern($emp, Carbon $from, Carbon $to, $records, $settings, $holidays, $leaves): array
+    private function memberPattern($emp, Carbon $from, Carbon $to, $settings, $holidays): array
     {
         $counts = ['attended' => 0.0, 'expected' => 0, 'late' => 0, 'early' => 0, 'half' => 0, 'absent' => 0, 'leave' => 0];
         $workedMinutes = [];
 
-        // Days before the joining date are not counted as absent
-        $cursor = $emp->joining_date ? $from->copy()->max(Carbon::parse($emp->joining_date)) : $from->copy();
-        while ($cursor->lte($to)) {
-            $dateStr = $cursor->format('Y-m-d');
-            $row = $this->buildRow($emp, $dateStr, $records->get($dateStr), $settings, $holidays, $leaves);
-            $cursor->addDay();
+        // Days before the joining date are not counted as absent; every day has the same rules as the attendance pages
+        $start = $emp->joining_date ? $from->copy()->max(Carbon::parse($emp->joining_date)) : $from->copy();
+        foreach ($emp->attendanceDays($start, $to, $settings, $holidays) as $day) {
+            $row = $emp->teamRow($day, $holidays);
 
             switch ($row['status']) {
                 case 'On Leave':

@@ -306,16 +306,16 @@ tbody, td, tfoot, th, thead, tr {
 <div class="row">
     <div class="col-12">
         <div class="glass-card">
-            <form method="GET" action="{{ route('manager.attendance.patterns') }}">
+            <form method="GET" action="{{ route('director.attendance.patterns') }}">
                 <div class="filter-bar">
 
                     <div class="form-group">
                         <label>Period</label>
                         <select class="form-control" name="period">
-                            <option value="30" selected>Last 30 days</option>
-                            <option value="60">Last 60 days</option>
-                            <option value="90">Last 90 days</option>
-                            <option value="cycle">Current cycle</option>
+                            <option value="30" @selected($period === '30')>Last 30 days</option>
+                            <option value="60" @selected($period === '60')>Last 60 days</option>
+                            <option value="90" @selected($period === '90')>Last 90 days</option>
+                            <option value="cycle" @selected($period === 'cycle')>Current cycle</option>
                         </select>
                     </div>
 
@@ -323,18 +323,16 @@ tbody, td, tfoot, th, thead, tr {
                         <label>Department</label>
                         <select class="form-control" name="department">
                             <option value="all">All departments</option>
-                            <option value="ict">ICT</option>
-                            <option value="engineering">Engineering</option>
-                            <option value="hr">HR</option>
-                            <option value="finance">Finance</option>
-                            <option value="marketing">Marketing</option>
+                            @foreach ($departments as $dept)
+                                <option value="{{ $dept->id }}" @selected((string) $department === (string) $dept->id)>{{ $dept->name }}</option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div class="btn-group">
                         <button type="submit" class="btn-primary-glass"><i class="bi bi-funnel"></i> Filter</button>
-                        <a href="{{ route('manager.attendance.patterns') }}" class="btn-outline-glass"><i class="bi bi-arrow-counterclockwise"></i> Clear</a>
-                        <button class="btn-outline-glass" onclick="alert('Export coming soon!')"><i class="bi bi-download"></i> Export</button>
+                        <a href="{{ route('director.attendance.patterns') }}" class="btn-outline-glass"><i class="bi bi-arrow-counterclockwise"></i> Clear</a>
+                        <a href="{{ route('director.attendance.patterns.export', ['period' => $period, 'department' => $department]) }}" class="btn-outline-glass"><i class="bi bi-download"></i> Export</a>
                     </div>
 
                 </div>
@@ -348,17 +346,17 @@ tbody, td, tfoot, th, thead, tr {
     <div class="col-12">
         <div class="summary-grid">
             <div class="summary-card">
-                <div class="number" style="color:#3b82f6;">87%</div>
+                <div class="number" style="color:#3b82f6;">{{ $summary['avg_attendance'] !== null ? $summary['avg_attendance'] . '%' : '—' }}</div>
                 <div class="label">Avg Attendance</div>
-                <div class="sub">team, 30 days</div>
+                <div class="sub">company, {{ $periodLabel }}</div>
             </div>
             <div class="summary-card">
-                <div class="number" style="color:#d97706;">12</div>
+                <div class="number" style="color:#d97706;">{{ $summary['total_late'] }}</div>
                 <div class="label">Total Late Arrivals</div>
                 <div class="sub">this period</div>
             </div>
             <div class="summary-card">
-                <div class="number" style="color:#ef4444;">2</div>
+                <div class="number" style="color:#ef4444;">{{ $summary['watch_count'] }}</div>
                 <div class="label">Members to Watch</div>
                 <div class="sub">≥3 late, absence, or &lt;90%</div>
             </div>
@@ -367,14 +365,18 @@ tbody, td, tfoot, th, thead, tr {
 </div>
 
 <!-- ===== PER-MEMBER PATTERNS TABLE ===== -->
+@php
+    $punctualityClass = ['Good' => ['good', 'green'], 'Average' => ['average', 'yellow'], 'Poor' => ['poor', 'red']];
+    $attendanceColor = fn ($pct) => $pct === null ? 'var(--text-muted)' : ($pct >= 90 ? '#22c55e' : ($pct >= 75 ? '#f59e0b' : '#ef4444'));
+@endphp
 <div class="row" style="margin-top:4px;">
     <div class="col-12">
         <div class="glass-card" style="padding:0; overflow:hidden;">
 
             <div class="section-header" style="padding:16px 20px 0 20px;">
                 <div>
-                    <h6>Per-Member Patterns</h6>
-                    <span class="sub">5 members · 30-day period</span>
+                    <h6>Per-Employee Patterns</h6>
+                    <span class="sub">{{ count($members) }} {{ count($members) === 1 ? 'member' : 'members' }} · {{ $periodLabel }}</span>
                 </div>
             </div>
 
@@ -388,94 +390,51 @@ tbody, td, tfoot, th, thead, tr {
                             <th>Early</th>
                             <th>Half</th>
                             <th>Absent</th>
+                            <th>On Leave</th>
                             <th>Punctuality</th>
                             <th>Avg Hrs</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Member 1 -->
-                        <tr>
-                            <td>
-                                <span class="member-name">John Doe</span>
-                                <br>
-                                <span class="member-id">GP-1003</span>
-                            </td>
-                            <td><span style="font-weight:600; color:#22c55e;">96%</span></td>
-                            <td>2</td>
-                            <td>0</td>
-                            <td>1</td>
-                            <td>0</td>
-                            <td><span class="badge-punctuality good"><span class="status-dot green"></span> Good</span></td>
-                            <td>8.2h</td>
-                        </tr>
-
-                        <!-- Member 2 -->
-                        <tr>
-                            <td>
-                                <span class="member-name">Jane Smith</span>
-                                <br>
-                                <span class="member-id">GP-1004</span>
-                            </td>
-                            <td><span style="font-weight:600; color:#f59e0b;">84%</span></td>
-                            <td>4</td>
-                            <td>0</td>
-                            <td>2</td>
-                            <td>1</td>
-                            <td><span class="badge-punctuality average"><span class="status-dot yellow"></span> Average</span></td>
-                            <td>7.5h</td>
-                        </tr>
-
-                        <!-- Member 3 -->
-                        <tr>
-                            <td>
-                                <span class="member-name">Mike Johnson</span>
-                                <br>
-                                <span class="member-id">GP-1005</span>
-                            </td>
-                            <td><span style="font-weight:600; color:#22c55e;">92%</span></td>
-                            <td>1</td>
-                            <td>1</td>
-                            <td>0</td>
-                            <td>1</td>
-                            <td><span class="badge-punctuality good"><span class="status-dot green"></span> Good</span></td>
-                            <td>8.0h</td>
-                        </tr>
-
-                        <!-- Member 4 — Members to Watch -->
-                        <tr style="border-left: 3px solid #ef4444;">
-                            <td>
-                                <span class="member-name">Sarah Lee</span>
-                                <br>
-                                <span class="member-id">GP-1006</span>
-                                <br>
-                                <span style="font-size:10px; color:#ef4444; font-weight:600;"><i class="bi bi-exclamation-triangle"></i> Needs attention</span>
-                            </td>
-                            <td><span style="font-weight:600; color:#ef4444;">72%</span></td>
-                            <td>5</td>
-                            <td>0</td>
-                            <td>3</td>
-                            <td>4</td>
-                            <td><span class="badge-punctuality poor"><span class="status-dot red"></span> Poor</span></td>
-                            <td>6.8h</td>
-                        </tr>
-
-                        <!-- Member 5 — Members to Watch -->
-                        <tr style="border-left: 3px solid #ef4444;">
-                            <td>
-                                <span class="member-name">David Khan</span>
-                                <br>
-                                <span class="member-id">GP-1007</span>
-                                <br>
-                                <span style="font-size:10px; color:#ef4444; font-weight:600;"><i class="bi bi-exclamation-triangle"></i> Needs attention</span>
-                            </td>
-                            <td><span style="font-weight:600; color:#ef4444;">68%</span></td>
-                            <td>6</td>
-                            <td>2</td>
-                            <td>1</td>
-                            <td>5</td>
-                            <td><span class="badge-punctuality poor"><span class="status-dot red"></span> Poor</span></td>
-                            <td>6.5h</td>
-                        </tr>
+                        @forelse ($members as $m)
+                            <tr @if ($m['watch']) style="border-left: 3px solid #ef4444;" @endif>
+                                <td>
+                                    <span class="member-name">{{ $m['name'] }}</span>
+                                    <br>
+                                    <span class="member-id">{{ $m['emp_id'] }} · {{ $m['department'] }}</span>
+                                    @if ($m['watch'])
+                                        <br>
+                                        <span style="font-size:10px; color:#ef4444; font-weight:600;"><i class="bi bi-exclamation-triangle"></i> Needs attention</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <span style="font-weight:600; color:{{ $attendanceColor($m['attendance']) }};">
+                                        {{ $m['attendance'] !== null ? $m['attendance'] . '%' : '—' }}
+                                    </span>
+                                </td>
+                                <td>{{ $m['late'] }}</td>
+                                <td>{{ $m['early'] }}</td>
+                                <td>{{ $m['half'] }}</td>
+                                <td>{{ $m['absent'] }}</td>
+                                <td>{{ $m['leave'] }}</td>
+                                <td>
+                                    @if (isset($punctualityClass[$m['punctuality']]))
+                                        <span class="badge-punctuality {{ $punctualityClass[$m['punctuality']][0] }}">
+                                            <span class="status-dot {{ $punctualityClass[$m['punctuality']][1] }}"></span> {{ $m['punctuality'] }}
+                                        </span>
+                                    @else
+                                        <span style="color:var(--text-muted);">N/A</span>
+                                    @endif
+                                </td>
+                                <td>{{ $m['avg_hours'] !== null ? $m['avg_hours'] . 'h' : '—' }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="9" style="text-align:center; padding:24px; color:var(--text-muted);">
+                                    No employees found for the selected filters.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

@@ -17,7 +17,7 @@
 
 
         <!-- ADMIN MENU                                -->
-        @if(Auth::user()->role->name == 'administrator')
+        @if(Auth::user()->hasRole('administrator'))
             <li class="nav-item">
                 <a href="{{ route('admin.dashboard') }}"
                     class="nav-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
@@ -46,6 +46,9 @@
                     class="nav-link {{ request()->routeIs('admin.approvals') ? 'active' : '' }}">
                     <i class="bi bi-check2-circle"></i>
                     <span>Approvals</span>
+                    @if (($sidebarBadges['admin.approvals'] ?? 0) > 0)
+                        <span class="nav-count" title="Waiting for your decision">{{ $sidebarBadges['admin.approvals'] > 99 ? '99+' : $sidebarBadges['admin.approvals'] }}</span>
+                    @endif
                 </a>
             </li>
 
@@ -57,6 +60,9 @@
                     class="nav-link {{ request()->routeIs('admin.leaves') ? 'active' : '' }}">
                     <i class="bi bi-calendar-check"></i>
                     <span>Leave Management</span>
+                    @if (($sidebarBadges['admin.leaves'] ?? 0) > 0)
+                        <span class="nav-count" title="Waiting for your decision">{{ $sidebarBadges['admin.leaves'] > 99 ? '99+' : $sidebarBadges['admin.leaves'] }}</span>
+                    @endif
                 </a>
             </li>
 
@@ -74,6 +80,16 @@
                     class="nav-link {{ request()->routeIs('admin.penalty') ? 'active' : '' }}">
                     <i class="bi bi-shield"></i>
                     <span>Late &amp; Half-Day Penalty</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.wfh') }}"
+                    class="nav-link {{ request()->routeIs('admin.wfh') ? 'active' : '' }}">
+                    <i class="bi bi-house-door"></i>
+                    <span>Work From Home</span>
+                    @if (($sidebarBadges['admin.wfh'] ?? 0) > 0)
+                        <span class="nav-count" title="Waiting for your decision">{{ $sidebarBadges['admin.wfh'] > 99 ? '99+' : $sidebarBadges['admin.wfh'] }}</span>
+                    @endif
                 </a>
             </li>
 
@@ -95,20 +111,11 @@
                     <span>Biometric Sync</span>
                 </a>
             </li>
-
             <li class="nav-item">
                 <a href="{{ route('admin.attendance.policy') }}"
                     class="nav-link {{ request()->routeIs('admin.attendance.policy') ? 'active' : '' }}">
                     <i class="bi bi-file-text"></i>
                     <span>Attendance Policy</span>
-                </a>
-            </li>
-
-            <li class="nav-item">
-                <a href="{{ route('admin.shifts') }}"
-                    class="nav-link {{ request()->routeIs('admin.shifts') ? 'active' : '' }}">
-                    <i class="bi bi-clock"></i>
-                    <span>Shift Management</span>
                 </a>
             </li>
 
@@ -124,7 +131,7 @@
 
 
         <!-- EMPLOYEE MENU                             -->
-        @if(Auth::user()->role->name == 'Employee')
+        @if(Auth::user()->hasRole('employee'))
             <li class="nav-item">
                 <a href="{{ route('employee.dashboard') }}"
                     class="nav-link {{ request()->routeIs('employee.dashboard') ? 'active' : '' }}">
@@ -161,91 +168,25 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('employee.penalty.waivers') }}"
-                    class="nav-link {{ request()->routeIs('employee.penalty.waivers') ? 'active' : '' }}">
+                <a href="{{ route('employee.penalty') }}"
+                    class="nav-link {{ request()->routeIs('employee.penalty') ? 'active' : '' }}">
                     <i class="bi bi-shield"></i>
                     <span>Penalty &amp; Waivers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('employee.wfh') }}"
+                    class="nav-link {{ request()->routeIs('employee.wfh') ? 'active' : '' }}">
+                    <i class="bi bi-house-door"></i>
+                    <span>Work From Home</span>
                 </a>
             </li>
         @endif
 
 
-        <!-- MANAGER MENU                              -->
-        @if(Auth::user()->role->name == 'Manager')
+        <!-- LINE MANAGER MENU -->
 
-            <li class="nav-item">
-                <a href="{{ route('manager.dashboard') }}"
-                    class="nav-link {{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">
-                    <i class="bi bi-grid-1x2"></i>
-                    <span>Dashboard</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('manager.my.attendance') }}"
-                    class="nav-link {{ request()->routeIs('manager.my.attendance') ? 'active' : '' }}">
-                    <i class="bi bi-clock-history"></i>
-                    <span>My Attendance</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('manager.correction.requests') }}"
-                    class="nav-link {{ request()->routeIs('manager.correction.requests') ? 'active' : '' }}">
-                    <i class="bi bi-pencil-square"></i>
-                    <span>Correction Requests</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('manager.leave') }}"
-                    class="nav-link {{ request()->routeIs('manager.leave') ? 'active' : '' }}">
-                    <i class="bi bi-calendar-check"></i>
-                    <span>Leave</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('manager.leave.report') }}"
-                    class="nav-link {{ request()->routeIs('manager.leave.report') ? 'active' : '' }}">
-                    <i class="bi bi-file-earmark-text"></i>
-                    <span>Leave Report</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('manager.penalty.waivers') }}"
-                    class="nav-link {{ request()->routeIs('manager.penalty.waivers') ? 'active' : '' }}">
-                    <i class="bi bi-shield"></i>
-                    <span>Penalty &amp; Waivers</span>
-                </a>
-            </li>
-
-            <!-- ===== TEAM ===== -->
-            <li class="menu-label" style="margin-top: 8px;">Team</li>
-
-            <li class="nav-item">
-                <a href="{{ route('manager.team.attendance') }}"
-                    class="nav-link {{ request()->routeIs('manager.team.attendance') ? 'active' : '' }}">
-                    <i class="bi bi-people"></i>
-                    <span>Team Attendance</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('manager.approvals') }}"
-                    class="nav-link {{ request()->routeIs('manager.approvals') ? 'active' : '' }}">
-                    <i class="bi bi-check2-circle"></i>
-                    <span>Approvals</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="{{ route('manager.attendance.patterns') }}"
-                    class="nav-link {{ request()->routeIs('manager.attendance.patterns') ? 'active' : '' }}">
-                    <i class="bi bi-graph-up"></i>
-                    <span>Attendance Patterns</span>
-                </a>
-            </li>
-        @endif
-
-
-        <!-- LINE MANAGER MENU                         -->
-
-        @if(Auth::user()->role->name == 'Line_Manager')
+        @if(Auth::user()->hasRole('line_manager'))
 
             <!-- Dashboard -->
             <li class="nav-item">
@@ -300,6 +241,13 @@
                     <span>Penalty &amp; Waivers</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{ route('line_manager.wfh') }}"
+                    class="nav-link {{ request()->routeIs('line_manager.wfh') ? 'active' : '' }}">
+                    <i class="bi bi-house-door"></i>
+                    <span>Work From Home</span>
+                </a>
+            </li>
 
             <!-- ===== TEAM ===== -->
             <li class="menu-label" style="margin-top: 8px;">Team</li>
@@ -319,6 +267,9 @@
                     class="nav-link {{ request()->routeIs('line_manager.approvals') ? 'active' : '' }}">
                     <i class="bi bi-check2-circle"></i>
                     <span>Approvals</span>
+                    @if (($sidebarBadges['line_manager.approvals'] ?? 0) > 0)
+                        <span class="nav-count" title="Waiting for your decision">{{ $sidebarBadges['line_manager.approvals'] > 99 ? '99+' : $sidebarBadges['line_manager.approvals'] }}</span>
+                    @endif
                 </a>
             </li>
 
@@ -334,20 +285,23 @@
         @endif
 
 
-        <!-- DIRECTOR MENU                             -->
-         @if(Auth::user()->role->name == 'Director')
+        <!-- MANAGER MENU (team = Line Managers) -->
 
+        @if(Auth::user()->hasRole('manager'))
+
+            <!-- Dashboard -->
             <li class="nav-item">
-                <a href="{{ route('director.dashboard') }}"
-                    class="nav-link {{ request()->routeIs('director.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('manager.dashboard') }}"
+                    class="nav-link {{ request()->routeIs('manager.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-grid-1x2"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
+
             <!-- My Attendance -->
             <li class="nav-item">
-                <a href="{{ route('director.my.attendance') }}"
-                    class="nav-link {{ request()->routeIs('director.my.attendance') ? 'active' : '' }}">
+                <a href="{{ route('manager.my.attendance') }}"
+                    class="nav-link {{ request()->routeIs('manager.my.attendance') ? 'active' : '' }}">
                     <i class="bi bi-clock-history"></i>
                     <span>My Attendance</span>
                 </a>
@@ -355,8 +309,8 @@
 
             <!-- Correction Requests -->
             <li class="nav-item">
-                <a href="{{ route('director.correction.requests') }}"
-                    class="nav-link {{ request()->routeIs('director.correction.requests') ? 'active' : '' }}">
+                <a href="{{ route('manager.correction.requests') }}"
+                    class="nav-link {{ request()->routeIs('manager.correction.requests') ? 'active' : '' }}">
                     <i class="bi bi-pencil-square"></i>
                     <span>Correction Requests</span>
                 </a>
@@ -364,8 +318,8 @@
 
             <!-- Leave -->
             <li class="nav-item">
-                <a href="{{ route('director.leave') }}"
-                    class="nav-link {{ request()->routeIs('director.leave') ? 'active' : '' }}">
+                <a href="{{ route('manager.leave') }}"
+                    class="nav-link {{ request()->routeIs('manager.leave') ? 'active' : '' }}">
                     <i class="bi bi-calendar-check"></i>
                     <span>Leave</span>
                 </a>
@@ -373,8 +327,8 @@
 
             <!-- Leave Report -->
             <li class="nav-item">
-                <a href="{{ route('director.leave.report') }}"
-                    class="nav-link {{ request()->routeIs('director.leave.report') ? 'active' : '' }}">
+                <a href="{{ route('manager.leave.report') }}"
+                    class="nav-link {{ request()->routeIs('manager.leave.report') ? 'active' : '' }}">
                     <i class="bi bi-file-earmark-text"></i>
                     <span>Leave Report</span>
                 </a>
@@ -382,10 +336,17 @@
 
             <!-- Penalty & Waivers -->
             <li class="nav-item">
-                <a href="{{ route('director.penalty.waivers') }}"
-                    class="nav-link {{ request()->routeIs('director.penalty.waivers') ? 'active' : '' }}">
+                <a href="{{ route('manager.penalty.waivers') }}"
+                    class="nav-link {{ request()->routeIs('manager.penalty.waivers') ? 'active' : '' }}">
                     <i class="bi bi-shield"></i>
                     <span>Penalty &amp; Waivers</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('manager.wfh') }}"
+                    class="nav-link {{ request()->routeIs('manager.wfh') ? 'active' : '' }}">
+                    <i class="bi bi-house-door"></i>
+                    <span>Work From Home</span>
                 </a>
             </li>
 
@@ -394,8 +355,8 @@
 
             <!-- Team Attendance -->
             <li class="nav-item">
-                <a href="{{ route('director.team.attendance') }}"
-                    class="nav-link {{ request()->routeIs('director.team.attendance') ? 'active' : '' }}">
+                <a href="{{ route('manager.team.attendance') }}"
+                    class="nav-link {{ request()->routeIs('manager.team.attendance') ? 'active' : '' }}">
                     <i class="bi bi-people"></i>
                     <span>Team Attendance</span>
                 </a>
@@ -403,14 +364,62 @@
 
             <!-- Approvals -->
             <li class="nav-item">
-                <a href="{{ route('director.approvals') }}"
-                    class="nav-link {{ request()->routeIs('director.approvals') ? 'active' : '' }}">
+                <a href="{{ route('manager.approvals') }}"
+                    class="nav-link {{ request()->routeIs('manager.approvals') ? 'active' : '' }}">
                     <i class="bi bi-check2-circle"></i>
                     <span>Approvals</span>
+                    @if (($sidebarBadges['manager.approvals'] ?? 0) > 0)
+                        <span class="nav-count" title="Waiting for your decision">{{ $sidebarBadges['manager.approvals'] > 99 ? '99+' : $sidebarBadges['manager.approvals'] }}</span>
+                    @endif
                 </a>
             </li>
 
             <!-- Attendance Patterns -->
+            <li class="nav-item">
+                <a href="{{ route('manager.attendance.patterns') }}"
+                    class="nav-link {{ request()->routeIs('manager.attendance.patterns') ? 'active' : '' }}">
+                    <i class="bi bi-graph-up"></i>
+                    <span>Attendance Patterns</span>
+                </a>
+            </li>
+
+        @endif
+
+
+        <!-- DIRECTOR MENU                             -->
+        @if(Auth::user()->hasRole('director'))
+
+            <li class="nav-item">
+                <a href="{{ route('director.dashboard') }}"
+                    class="nav-link {{ request()->routeIs('director.dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+
+            <!-- Approvals (requests of the Managers reporting to the Director) -->
+            <li class="nav-item">
+                <a href="{{ route('director.approvals') }}"
+                    class="nav-link {{ request()->routeIs('director.approvals') ? 'active' : '' }}">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>Approvals</span>
+                    @if (($sidebarBadges['director.approvals'] ?? 0) > 0)
+                        <span class="nav-count" title="Waiting for your decision">{{ $sidebarBadges['director.approvals'] > 99 ? '99+' : $sidebarBadges['director.approvals'] }}</span>
+                    @endif
+                </a>
+            </li>
+
+            <!-- ===== COMPANY ===== -->
+            <li class="menu-label" style="margin-top: 8px;">Company</li>
+
+            <li class="nav-item">
+                <a href="{{ route('director.team.attendance') }}"
+                    class="nav-link {{ request()->routeIs('director.team.attendance') ? 'active' : '' }}">
+                    <i class="bi bi-people"></i>
+                    <span>Company Attendance</span>
+                </a>
+            </li>
+
             <li class="nav-item">
                 <a href="{{ route('director.attendance.patterns') }}"
                     class="nav-link {{ request()->routeIs('director.attendance.patterns') ? 'active' : '' }}">
@@ -419,7 +428,6 @@
                 </a>
             </li>
 
-            <!-- Attendance Breakdown -->
             <li class="nav-item">
                 <a href="{{ route('director.attendance.breakdown') }}"
                     class="nav-link {{ request()->routeIs('director.attendance.breakdown') ? 'active' : '' }}">
@@ -428,9 +436,21 @@
                 </a>
             </li>
 
-            <!-- ===== SETTINGS / REPORTS ===== -->
-            <li class="menu-label" style="margin-top: 8px;">Settings</li>
+            <li class="nav-item">
+                <a href="{{ route('director.employees') }}"
+                    class="nav-link {{ request()->routeIs('director.employees') ? 'active' : '' }}">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Employees</span>
+                </a>
+            </li>
 
+            <li class="nav-item">
+                <a href="{{ route('director.reports') }}"
+                    class="nav-link {{ request()->routeIs('director.reports') ? 'active' : '' }}">
+                    <i class="bi bi-file-earmark-bar-graph"></i>
+                    <span>Reports</span>
+                </a>
+            </li>
 
         @endif
     </ul>

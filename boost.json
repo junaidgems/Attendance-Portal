@@ -3,5 +3,9 @@
         "claude_code"
     ],
     "cloud": true,
-    "guidelines": true
+    "guidelines": true,
+    "skills": [
+        "laravel-best-practices",
+        "deploying-laravel-cloud"
+    ]
 }

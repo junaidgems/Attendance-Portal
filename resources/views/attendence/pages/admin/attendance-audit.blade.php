@@ -4,7 +4,7 @@
 @section('page-title', 'Attendance Audit')
 
 @push('styles')
-<link rel="stylesheet" href="{{ asset('css/attendence-audit.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/attendence-audit.css') }}">
 @endpush
 
 @section('content')
@@ -19,41 +19,53 @@
 
                         <div class="form-group">
                             <label>From</label>
-                            <input type="date" class="form-control" name="from" value="2026-06-26">
+                            <input type="date" class="form-control" name="from" value="{{ $from }}" min="{{ \App\Models\Employee::ATTENDANCE_START_DATE }}">
                         </div>
 
                         <div class="form-group">
                             <label>To</label>
-                            <input type="date" class="form-control" name="to" value="2026-07-20">
+                            <input type="date" class="form-control" name="to" value="{{ $to }}" min="{{ \App\Models\Employee::ATTENDANCE_START_DATE }}">
                         </div>
 
                         <div class="form-group">
                             <label>Department</label>
-                            <select class="form-control" name="department">
-                                <option value="all">All departments</option>
-                                <option value="ICT">ICT</option>
-                                <option value="Engineering">Engineering</option>
-                                <option value="HR">HR</option>
-                                <option value="Finance">Finance</option>
-                                <option value="Marketing">Marketing</option>
+                            <select class="form-control" name="department" id="auditDepartment">
+                                <option value="all" {{ $department == 'all' ? 'selected' : '' }}>All departments</option>
+                                @foreach($departments as $dept)
+                                    <option value="{{ $dept->name }}" {{ $department == $dept->name ? 'selected' : '' }}>
+                                        {{ $dept->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="flex: 1.5;">
+                            <label>Employee</label>
+                            <select class="form-control" name="employee" id="auditEmployee">
+                                <option value="all" @selected($employee === 'all')>All employees</option>
+                                @foreach ($employees as $emp)
+                                    <option value="{{ $emp->id }}" data-department="{{ $emp->department->name ?? '' }}"
+                                        @selected((string) $employee === (string) $emp->id)>
+                                        {{ $emp->full_name }} ({{ $emp->employee_id }})
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
 
                         <div class="form-group">
                             <label>Status</label>
                             <select class="form-control" name="status">
-                                <option value="all">All statuses</option>
-                                <option value="Present">Present</option>
-                                <option value="Absent">Absent</option>
-                                <option value="Late">Late</option>
-                                <option value="Early Leave">Early Leave</option>
-                                <option value="Holiday">Holiday</option>
+                                <option value="all" {{ $status == 'all' ? 'selected' : '' }}>All statuses</option>
+                                @foreach (['Present', 'Late', 'Early Out', 'Half Day', 'Missing Punch', 'Absent', 'On Leave', 'Holiday', 'Weekend'] as $option)
+                                    <option value="{{ $option }}" @selected($status === $option)>{{ $option }}</option>
+                                @endforeach
                             </select>
                         </div>
 
                         <div class="form-group" style="flex: 1.5;">
                             <label>Search</label>
-                            <input type="text" class="form-control" name="search" placeholder="Name or Employee ID">
+                            <input type="text" class="form-control" name="search" placeholder="Name or Employee ID"
+                                value="{{ $search }}">
                         </div>
 
                         <div class="btn-group">
@@ -80,13 +92,13 @@
                 <div class="section-header">
                     <div>
                         <h6>Attendance Audit</h6>
-                        <span class="subtitle">7 rows</span>
+                        <span class="subtitle">{{ count($rows) }} rows</span>
                     </div>
                     <div class="btn-group">
-
-                        <button class="btn-primary-glass" onclick="alert('Export functionality coming soon!')">
+                        <a href="{{ route('admin.attendance.audit.export', ['from' => $from, 'to' => $to, 'department' => $department, 'employee' => $employee, 'status' => $status, 'search' => $search]) }}"
+                            class="btn-primary-glass">
                             <i class="bi bi-download"></i> Export
-                        </button>
+                        </a>
                     </div>
 
                 </div>
@@ -111,174 +123,48 @@
                                 <th>Early Leave</th>
                                 <th>OT (hrs)</th>
                                 <th>Status</th>
-                                <th>Machine</th>
                                 <th>Verification</th>
                                 <th>Remarks</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-
-                            <!-- Row 1 -->
-                            <tr>
-                                <td>1</td>
-                                <td><strong>GP-1002</strong></td>
-                                <td>Junaid</td>
-                                <td>ICT</td>
-                                <td>Frontend Developer</td>
-                                <td>26-Jun-2026</td>
-                                <td>Standard Shift</td>
-                                <td>09:00</td>
-                                <td>17:00</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td><span class="status-badge absent">Absent</span></td>
-                                <td>—</td>
-                                <td>No attendance record</td>
-                                <td>—</td>
-                            </tr>
-
-                            <!-- Row 2 -->
-                            <tr>
-                                <td>2</td>
-                                <td><strong>GP-1002</strong></td>
-                                <td>Junaid</td>
-                                <td>ICT</td>
-                                <td>Frontend Developer</td>
-                                <td>27-Jun-2026</td>
-                                <td>Standard Shift</td>
-                                <td>09:00</td>
-                                <td>17:00</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td><span class="status-badge holiday">Holiday</span></td>
-                                <td>—</td>
-                                <td>Weekly holiday</td>
-                                <td>—</td>
-                            </tr>
-
-                            <!-- Row 3 -->
-                            <tr>
-                                <td>3</td>
-                                <td><strong>GP-1002</strong></td>
-                                <td>Junaid</td>
-                                <td>ICT</td>
-                                <td>Frontend Developer</td>
-                                <td>28-Jun-2026</td>
-                                <td>Standard Shift</td>
-                                <td>09:00</td>
-                                <td>17:00</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>—</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td><span class="status-badge holiday">Holiday</span></td>
-                                <td>—</td>
-                                <td>Weekly holiday</td>
-                                <td>—</td>
-                            </tr>
-
-                            <!-- Row 4 -->
-                            <tr>
-                                <td>4</td>
-                                <td><strong>GP-1001</strong></td>
-                                <td>Faraz Siddiqui</td>
-                                <td>ICT</td>
-                                <td>System Administrator</td>
-                                <td>26-Jun-2026</td>
-                                <td>Standard Shift</td>
-                                <td>09:00</td>
-                                <td>17:00</td>
-                                <td>09:05</td>
-                                <td>17:30</td>
-                                <td>8.5</td>
-                                <td>5</td>
-                                <td>0</td>
-                                <td>0.5</td>
-                                <td><span class="status-badge present">Present</span></td>
-                                <td>BIO-001</td>
-                                <td>Biometric Verified</td>
-                                <td>—</td>
-                            </tr>
-
-                            <!-- Row 5 -->
-                            <tr>
-                                <td>5</td>
-                                <td><strong>GP-1003</strong></td>
-                                <td>John Doe</td>
-                                <td>Engineering</td>
-                                <td>Engineering Manager</td>
-                                <td>26-Jun-2026</td>
-                                <td>Standard Shift</td>
-                                <td>09:00</td>
-                                <td>17:00</td>
-                                <td>09:45</td>
-                                <td>17:10</td>
-                                <td>7.5</td>
-                                <td>45</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td><span class="status-badge late">Late</span></td>
-                                <td>BIO-002</td>
-                                <td>Biometric Verified</td>
-                                <td>Traffic jam</td>
-                            </tr>
-
-                            <!-- Row 6 -->
-                            <tr>
-                                <td>6</td>
-                                <td><strong>GP-1004</strong></td>
-                                <td>Jane Smith</td>
-                                <td>HR</td>
-                                <td>HR Executive</td>
-                                <td>26-Jun-2026</td>
-                                <td>Standard Shift</td>
-                                <td>09:00</td>
-                                <td>17:00</td>
-                                <td>09:00</td>
-                                <td>16:30</td>
-                                <td>7.5</td>
-                                <td>0</td>
-                                <td>30</td>
-                                <td>0</td>
-                                <td><span class="status-badge early-leave">Early Leave</span></td>
-                                <td>BIO-003</td>
-                                <td>Biometric Verified</td>
-                                <td>Doctor appointment</td>
-                            </tr>
-
-                            <!-- Row 7 -->
-                            <tr>
-                                <td>7</td>
-                                <td><strong>GP-1005</strong></td>
-                                <td>Mike Johnson</td>
-                                <td>Finance</td>
-                                <td>Finance Analyst</td>
-                                <td>26-Jun-2026</td>
-                                <td>Standard Shift</td>
-                                <td>09:00</td>
-                                <td>17:00</td>
-                                <td>08:55</td>
-                                <td>18:00</td>
-                                <td>9.0</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td>1.0</td>
-                                <td><span class="status-badge present">Present</span></td>
-                                <td>BIO-004</td>
-                                <td>Biometric Verified</td>
-                                <td>—</td>
-                            </tr>
-
+                            @forelse($rows as $row)
+                                <tr>
+                                    <td>{{ $row['#'] }}</td>
+                                    <td><strong>{{ $row['emp_id'] }}</strong></td>
+                                    <td>{{ $row['employee'] }}</td>
+                                    <td>{{ $row['dept'] }}</td>
+                                    <td>{{ $row['designation'] }}</td>
+                                    <td>{{ $row['date'] }}</td>
+                                    <td>{{ $row['shift'] }}</td>
+                                    <td>{{ $row['sch_in'] }}</td>
+                                    <td>{{ $row['sch_out'] }}</td>
+                                    <td>{{ $row['first_in'] }}</td>
+                                    <td>{{ $row['last_out'] }}</td>
+                                    <td>{{ $row['total_hrs'] }}</td>
+                                    <td>{{ $row['late_min'] }}</td>
+                                    <td>{{ $row['early_min'] }}</td>
+                                    <td>{{ $row['ot_hrs'] }}</td>
+                                    <td><span
+                                            class="status-badge {{ \Illuminate\Support\Str::slug($row['status']) }}">{{ $row['status'] }}</span>
+                                    </td>
+                                    <td>{{ $row['verification'] }}</td>
+                                    <td>{{ $row['remarks'] }}</td>
+                                    <td>
+                                        @if ($row['status'] === 'Absent')
+                                            <button type="button" class="btn-outline-glass" style="padding:4px 10px; font-size:12px; white-space:nowrap;"
+                                                onclick="openInformAbsent({{ $row['employee_key'] }}, @js($row['employee']), '{{ $row['date_iso'] }}', @js($row['date']))">
+                                                <i class="bi bi-envelope"></i> Inform
+                                            </button>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="19" style="text-align:center; padding:20px;">No Record Found</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -287,4 +173,70 @@
         </div>
     </div>
 
+    <!-- INFORM ABSENT EMPLOYEE -->
+    <div class="modal fade modal-glass" id="informAbsentModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="POST" action="{{ route('admin.attendance.audit.inform-absent') }}">
+                    @csrf
+                    <input type="hidden" name="employee_id" id="informEmployeeId">
+                    <input type="hidden" name="date" id="informDate">
+                    <div class="modal-header">
+                        <h5 class="modal-title"><i class="bi bi-envelope"></i> Inform <span id="informEmployeeName"></span></h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Message (sent by email and portal notification)</label>
+                            <textarea name="message" id="informMessage" class="form-control" rows="4" maxlength="1000" required></textarea>
+                        </div>
+                        <div class="form-group" style="display:flex; align-items:center; gap:8px; margin-top:10px;">
+                            <input type="checkbox" name="copy_manager" id="informCopyManager" value="1" style="width:auto;" checked>
+                            <label for="informCopyManager" style="margin:0;">Also inform their Line Manager / Manager</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-outline-glass" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn-primary-glass"><i class="bi bi-send"></i> Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
 @endsection
+
+@push('scripts')
+<script>
+    function openInformAbsent(employeeId, name, dateIso, dateLabel) {
+        document.getElementById('informEmployeeId').value = employeeId;
+        document.getElementById('informDate').value = dateIso;
+        document.getElementById('informEmployeeName').textContent = name;
+        document.getElementById('informMessage').value =
+            'You were marked absent on ' + dateLabel + ' (no attendance punch and no approved leave). ' +
+            'If this is a mistake, please submit a correction request or contact Admin.';
+        new bootstrap.Modal(document.getElementById('informAbsentModal')).show();
+    }
+
+    // Employee dropdown shows only the chosen department's employees
+    (function () {
+        const department = document.getElementById('auditDepartment');
+        const employee = document.getElementById('auditEmployee');
+
+        function filterEmployees() {
+            const dept = department.value;
+            employee.querySelectorAll('option[data-department]').forEach(function (option) {
+                const visible = dept === 'all' || option.dataset.department === dept;
+                option.hidden = !visible;
+                option.disabled = !visible;
+            });
+            if (employee.selectedOptions[0]?.disabled) {
+                employee.value = 'all';
+            }
+        }
+
+        department.addEventListener('change', filterEmployees);
+        filterEmployees();
+    })();
+</script>
+@endpush

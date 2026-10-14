@@ -12,51 +12,53 @@
 
 <!-- FILTER BAR  -->
 <div class="glass-card">
-    <form method="GET" action="{{ route('employee.leave.report') }}">
+    <form method="GET" action="{{ route('manager.leave.report') }}">
         <div class="filter-bar">
 
             <div class="form-group">
                 <label>Year</label>
                 <select class="form-control" name="year">
-                    <option value="2026" selected>2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
+                    @for ($y = now()->year; $y >= now()->year - 3; $y--)
+                        <option value="{{ $y }}" {{ (string)$year === (string)$y ? 'selected' : '' }}>{{ $y }}</option>
+                    @endfor
                 </select>
             </div>
 
             <div class="form-group">
                 <label>From</label>
-                <input type="date" class="form-control" name="from" value="2026-01-01">
+                <input type="date" class="form-control" name="from" value="{{ $from }}">
             </div>
 
             <div class="form-group">
                 <label>To</label>
-                <input type="date" class="form-control" name="to" value="2026-07-21">
+                <input type="date" class="form-control" name="to" value="{{ $to }}">
             </div>
 
             <div class="form-group">
                 <label>Leave Type</label>
                 <select class="form-control" name="leave_type">
-                    <option value="all">All types</option>
-                    <option value="annual">Annual Leave</option>
-                    <option value="sick">Sick Leave</option>
-                    <option value="casual">Casual Leave</option>
+                    <option value="all" {{ $leaveType == 'all' ? 'selected' : '' }}>All types</option>
+                    <option value="Annual Leave" {{ $leaveType == 'Annual Leave' ? 'selected' : '' }}>Annual Leave</option>
+                    <option value="Sick Leave" {{ $leaveType == 'Sick Leave' ? 'selected' : '' }}>Sick Leave</option>
+                    <option value="Casual Leave" {{ $leaveType == 'Casual Leave' ? 'selected' : '' }}>Casual Leave</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label>Status</label>
                 <select class="form-control" name="status">
-                    <option value="all">All</option>
-                    <option value="approved">Approved</option>
-                    <option value="pending">Pending</option>
-                    <option value="rejected">Rejected</option>
+                    <option value="all" {{ $status == 'all' ? 'selected' : '' }}>All</option>
+                    <option value="approved" {{ $status == 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="pending" {{ $status == 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="rejected" {{ $status == 'rejected' ? 'selected' : '' }}>Rejected</option>
                 </select>
             </div>
 
             <div class="btn-group">
                 <button type="submit" class="btn-primary-glass"><i class="bi bi-funnel"></i> Filter</button>
-                <a href="{{ route('employee.leave.report') }}" class="btn-outline-glass"><i class="bi bi-arrow-counterclockwise"></i> Clear</a>
+              <a href="{{ route('manager.leave.report') }}" class="btn-outline-glass">
+    <i class="bi bi-arrow-counterclockwise"></i> Clear
+</a>
             </div>
 
         </div>
@@ -68,36 +70,36 @@
 
 <div class="summary-grid">
     <div class="summary-card">
-        <div class="number">0</div>
+        <div class="number">{{ $summary['approved_days'] }}</div>
         <div class="label">Approved Leave Days</div>
         <div class="sub">in selected range</div>
     </div>
     <div class="summary-card">
-        <div class="number">0</div>
+        <div class="number">{{ $summary['pending_requests'] }}</div>
         <div class="label">Pending Requests</div>
         <div class="sub">awaiting approval</div>
     </div>
     <div class="summary-card">
-        <div class="number">0</div>
+        <div class="number">{{ $summary['rejected_requests'] }}</div>
         <div class="label">Rejected Requests</div>
         <div class="sub">in selected range</div>
     </div>
     <div class="summary-card">
-        <div class="number">0</div>
+        <div class="number">{{ $summary['on_leave_today'] }}</div>
         <div class="label">On Leave Today</div>
         <div class="sub">today</div>
     </div>
 </div>
 
 
-<!-- LEAVE BALANCES   -->
+<!-- LEAVE BALANCES (sirf apni team ke members) -->
 
 <div class="glass-card">
 
     <div class="section-header">
         <div>
             <h6>Leave balances</h6>
-            <span class="subtitle">1 employee · 2026</span>
+            <span class="subtitle">{{ count($balances) }} employee{{ count($balances) == 1 ? '' : 's' }} · {{ $year }}</span>
         </div>
     </div>
 
@@ -113,43 +115,54 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>
-                        <strong>Junaid</strong>
-                        <br>
-                        <span style="font-size:11px; color:var(--text-muted);">GP-1002</span>
-                    </td>
-                    <td style="text-align:center;">
-                        <span class="balance-used">0</span>
-                        <span class="balance-total">/ 14</span>
-                    </td>
-                    <td style="text-align:center;">
-                        <span class="balance-used">0</span>
-                        <span class="balance-total">/ 8</span>
-                    </td>
-                    <td style="text-align:center;">
-                        <span class="balance-used">0</span>
-                        <span class="balance-total">/ 10</span>
-                    </td>
-                    <td style="text-align:center;">
-                        <span style="font-weight:700; color:var(--text-primary);">0</span>
-                    </td>
-                </tr>
+                @forelse($balances as $b)
+                    <tr>
+                        <td>
+                            <strong>{{ $b['employee'] }}</strong>
+                            <br>
+                            <span style="font-size:11px; color:var(--text-muted);">{{ $b['id'] }}</span>
+                        </td>
+                        <td style="text-align:center;">
+                            <span class="balance-used">{{ $b['annual']['used'] }}</span>
+                            <span class="balance-total">/ {{ $b['annual']['total'] }}</span>
+                        </td>
+                        <td style="text-align:center;">
+                            <span class="balance-used">{{ $b['sick']['used'] }}</span>
+                            <span class="balance-total">/ {{ $b['sick']['total'] }}</span>
+                        </td>
+                        <td style="text-align:center;">
+                            <span class="balance-used">{{ $b['casual']['used'] }}</span>
+                            <span class="balance-total">/ {{ $b['casual']['total'] }}</span>
+                        </td>
+                        <td style="text-align:center;">
+                            <span style="font-weight:700; color:var(--text-primary);">{{ $b['total_taken'] }}</span>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p>Aapki team mein koi active employee nahi mila.</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
-    </table>
+        </table>
     </div>
 
 </div>
 
 
-<!-- LEAVE REGISTER  -->
+<!-- LEAVE REGISTER (sirf apni team ki requests) -->
 
 <div class="glass-card">
 
     <div class="section-header">
         <div>
             <h6>Leave register</h6>
-            <span class="subtitle">0 requests</span>
+            <span class="subtitle">{{ count($register) }} request{{ count($register) == 1 ? '' : 's' }}</span>
         </div>
     </div>
 
@@ -157,6 +170,7 @@
         <table class="register-table">
             <thead>
                 <tr>
+                    <th>Employee</th>
                     <th>Type</th>
                     <th>From</th>
                     <th>To</th>
@@ -166,46 +180,27 @@
                 </tr>
             </thead>
             <tbody>
-                <!-- Dummy Data 1 -->
-                <tr>
-                    <td><strong>Annual Leave</strong></td>
-                    <td>20 Jul 2026</td>
-                    <td>22 Jul 2026</td>
-                    <td>3</td>
-                    <td><span class="status-badge pending">Pending</span></td>
-                    <td style="font-size:12px; color:var(--text-muted);">Family event</td>
-                </tr>
-                <!-- Dummy Data 2 -->
-                <tr>
-                    <td><strong>Sick Leave</strong></td>
-                    <td>15 Jul 2026</td>
-                    <td>15 Jul 2026</td>
-                    <td>1</td>
-                    <td><span class="status-badge approved">Approved</span></td>
-                    <td style="font-size:12px; color:var(--text-muted);">Doctor appointment</td>
-                </tr>
-                <!-- Dummy Data 3 -->
-                <tr>
-                    <td><strong>Casual Leave</strong></td>
-                    <td>10 Jul 2026</td>
-                    <td>10 Jul 2026</td>
-                    <td>1</td>
-                    <td><span class="status-badge rejected">Rejected</span></td>
-                    <td style="font-size:12px; color:var(--text-muted);">Insufficient balance</td>
-                </tr>
-
-                <!-- Empty State (Uncomment if needed) -->
-                <!--
-                <tr>
-                    <td colspan="6">
-                        <div class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <p>No leave requests match these filters.</p>
-                            <span class="sub">Try adjusting your search or filters.</span>
-                        </div>
-                    </td>
-                </tr>
-                -->
+                @forelse($register as $r)
+                    <tr>
+                        <td><strong>{{ $r['employee'] }}</strong></td>
+                        <td>{{ $r['type'] }}</td>
+                        <td>{{ \Carbon\Carbon::parse($r['from'])->format('d M Y') }}</td>
+                        <td>{{ \Carbon\Carbon::parse($r['to'])->format('d M Y') }}</td>
+                        <td>{{ $r['days'] }}</td>
+                        <td><span class="status-badge {{ $r['status'] }}">{{ ucfirst($r['status']) }}</span></td>
+                        <td style="font-size:12px; color:var(--text-muted);">{{ $r['reason'] ?? '-' }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <p>No leave requests match these filters.</p>
+                                <span class="sub">Try adjusting your search or filters.</span>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

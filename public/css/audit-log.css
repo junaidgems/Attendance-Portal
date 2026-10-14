@@ -270,6 +270,10 @@
     }
 
 
+
+
+
+
 @media (max-width: 768px) {
     .glass-card {
         padding: 16px;
@@ -310,4 +314,54 @@
     .audit-table td {
         padding: 4px 8px;
     }
+}
+/* ===== PAGINATION (Bootstrap markup, portal theme) ===== */
+.audit-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 16px;
+}
+.audit-pagination-info {
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.audit-pagination .pagination {
+    margin: 0;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+.audit-pagination .page-link {
+    min-width: 34px;
+    text-align: center;
+    border-radius: 8px !important;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 13px;
+    padding: 5px 10px;
+    box-shadow: none;
+}
+.audit-pagination .page-link:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+.audit-pagination .page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+.audit-pagination .page-item.disabled .page-link {
+    background: transparent;
+    color: var(--text-muted);
+    opacity: 0.6;
+}
+
+/* While an AJAX page is loading */
+#auditLogResults.is-loading {
+    opacity: 0.5;
+    pointer-events: none;
+    transition: opacity 0.15s;
 }

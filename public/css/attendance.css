@@ -1,6 +1,6 @@
 .sidebar-menu .nav-item {
     list-style: none;
-    margin-bottom: 5px !important;
+    margin-bottom: 14px !important;
 }
         .glass-card {
             background: var(--bg-topbar);
@@ -491,3 +491,44 @@
         .row-hidden {
             display: none !important;
         }
+
+/* Worked-out statuses (shift rules + waivers) */
+.status-badge.early-out,
+.status-badge.half-day {
+    background: #fef3c7;
+    color: #b45309;
+}
+.status-badge.missing-punch {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Pagination (Bootstrap markup, portal theme) */
+.attendance-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+.attendance-pagination .pagination {
+    margin: 0;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+.attendance-pagination .page-link {
+    border-radius: 8px !important;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-size: 13px;
+    padding: 5px 10px;
+}
+.attendance-pagination .page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}

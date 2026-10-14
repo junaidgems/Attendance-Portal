@@ -11,29 +11,28 @@
 
     <!-- ===== GREETING ===== -->
     <div class="greeting-card">
-        <h4>Welcome, {{ session('user_name') }} 👋</h4>
-       {{ session()->get('user_role') }} 
+        <h4>Welcome, {{ Auth::user()->name }} 👋</h4>
 
-        <p>Your attendance at a glance - Cycle: 26 Jun – 25 Jul 2026</p>
+        <p>Your attendance at a glance - Cycle: {{ $attendanceCycleLabel }}</p>
     </div>
 
     <!-- ===== STATS ===== -->
     <div class="stat-grid">
         <div class="stat-card">
-            <div class="number">0%</div>
+            <div class="number">{{ $attendancePercent }}%</div>
             <div class="label">Attendance (30d)</div>
-            <div class="sub">0/17 working days</div>
+            <div class="sub">{{ $presentDays }}/{{ $totalWorkingDays }} working days</div>
         </div>
         <div class="stat-card">
-            <div class="number">0</div>
+            <div class="number">{{ $lateCount }}</div>
             <div class="label">Late Arrivals</div>
         </div>
         <div class="stat-card">
-            <div class="number">—</div>
+            <div class="number">{{ $avgHours }}</div>
             <div class="label">Avg Hours / Day</div>
         </div>
         <div class="stat-card">
-            <div class="number">0</div>
+            <div class="number">{{ $openRequests }}</div>
             <div class="label">Open Requests</div>
         </div>
     </div>
@@ -41,27 +40,27 @@
     <!-- ===== LEAVE BALANCE ===== -->
     <div class="section-header">
         <h6>Leave Balance</h6>
-        <span class="sub"><a href="#" style="color:var(--primary); text-decoration:none;">Apply →</a></span>
+        <span class="sub"><a href="{{ route('employee.leave') }}" style="color:var(--primary); text-decoration:none;">Apply →</a></span>
     </div>
 
     <div class="leave-balance-grid">
         <div class="leave-card">
             <span class="leave-icon annual">🏖️</span>
             <div class="leave-label">Annual Leave</div>
-            <div class="leave-balance">14</div>
-            <div class="leave-total">/ 14</div>
+            <div class="leave-balance">{{ $balances['Annual Leave']['used'] }}</div>
+            <div class="leave-total">/ {{ $balances['Annual Leave']['total'] }}</div>
         </div>
         <div class="leave-card">
             <span class="leave-icon sick">🤒</span>
             <div class="leave-label">Sick Leave</div>
-            <div class="leave-balance">8</div>
-            <div class="leave-total">/ 8</div>
+            <div class="leave-balance">{{ $balances['Sick Leave']['used'] }}</div>
+            <div class="leave-total">/ {{ $balances['Sick Leave']['total'] }}</div>
         </div>
         <div class="leave-card">
             <span class="leave-icon casual">🎯</span>
             <div class="leave-label">Casual Leave</div>
-            <div class="leave-balance">10</div>
-            <div class="leave-total">/ 10</div>
+            <div class="leave-balance">{{ $balances['Casual Leave']['used'] }}</div>
+            <div class="leave-total">/ {{ $balances['Casual Leave']['total'] }}</div>
         </div>
     </div>
 
@@ -89,36 +88,36 @@
         </a>
     </div>
 
-<!-- ===== MONTHLY STATS — LINKS TO BREAKDOWN ===== -->
-<div class="glass-card">
-    <div class="section-header">
-        <h6>This Month — Tap any card for full list</h6>
-        <span class="sub">0 new</span>
-    </div>
+    <!-- ===== MONTHLY STATS — LINKS TO BREAKDOWN ===== -->
+    <div class="glass-card">
+        <div class="section-header">
+            <h6>This Month — Tap any card for full list</h6>
+            <span class="sub">0 new</span>
+        </div>
 
-    <div class="monthly-grid">
-        <a href="{{ route('employee.attendance.breakdown', ['type' => 'missing-punch']) }}" class="monthly-item" style="text-decoration:none;">
-            <div class="num">0</div>
-            <div class="label">Missing Punch</div>
-        </a>
-        <a href="{{ route('employee.attendance.breakdown', ['type' => 'half-day']) }}" class="monthly-item" style="text-decoration:none;">
-            <div class="num">0</div>
-            <div class="label">Half Day</div>
-        </a>
-        <a href="{{ route('employee.attendance.breakdown', ['type' => 'early-out']) }}" class="monthly-item" style="text-decoration:none;">
-            <div class="num">0</div>
-            <div class="label">Early Out</div>
-        </a>
-        <a href="{{ route('employee.attendance.breakdown', ['type' => 'absent']) }}" class="monthly-item" style="text-decoration:none;">
-            <div class="num">13</div>
-            <div class="label">Absent</div>
-        </a>
-        <a href="{{ route('employee.attendance.breakdown', ['type' => 'on-leave']) }}" class="monthly-item" style="text-decoration:none;">
-            <div class="num">0</div>
-            <div class="label">On Leave</div>
-        </a>
+        <div class="monthly-grid">
+            <a href="{{ route('employee.attendance.breakdown', ['type' => 'missing-punch']) }}" class="monthly-item">
+                <div class="num">{{ $missingPunch }}</div>
+                <div class="label">Missing Punch</div>
+            </a>
+            <a href="{{ route('employee.attendance.breakdown', ['type' => 'half-day']) }}" class="monthly-item">
+                <div class="num">{{ $halfDay }}</div>
+                <div class="label">Half Day</div>
+            </a>
+            <a href="{{ route('employee.attendance.breakdown', ['type' => 'early-out']) }}" class="monthly-item">
+                <div class="num">{{ $earlyOut }}</div>
+                <div class="label">Early Out</div>
+            </a>
+            <a href="{{ route('employee.attendance.breakdown', ['type' => 'absent']) }}" class="monthly-item">
+                <div class="num">{{ $absentCount }}</div>
+                <div class="label">Absent</div>
+            </a>
+            <a href="{{ route('employee.attendance.breakdown', ['type' => 'on-leave']) }}" class="monthly-item">
+                <div class="num">{{ $onLeaveCount }}</div>
+                <div class="label">On Leave</div>
+            </a>
+        </div>
     </div>
-</div>
     <!-- ===== NOTIFICATIONS ===== -->
     <div class="notif-card">
         <div class="notif-left">
@@ -150,22 +149,20 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Tue 14 Jul</td>
-                    <td><span class="status-badge absent">Absent</span></td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                </tr>
-                <tr>
-                    <td>Mon 13 Jul</td>
-                    <td><span class="status-badge absent">Absent</span></td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                    <td>—</td>
-                </tr>
+                @forelse($recentDays as $day)
+                    <tr>
+                        <td>{{ $day['date'] }}</td>
+                        <td><span class="status-badge {{ strtolower($day['status']) }}">{{ $day['status'] }}</span></td>
+                        <td>{{ $day['in'] }}</td>
+                        <td>{{ $day['out'] }}</td>
+                        <td>{{ $day['hours'] }}</td>
+                        <td>{{ $day['timeline'] }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" style="text-align:center; padding:20px;">Koi record nahi mila.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

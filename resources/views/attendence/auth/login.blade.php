@@ -5,25 +5,18 @@
 @section('content')
     <link rel="stylesheet" href="{{ asset('css/login.css') }}">
 
-
-
     <div class="login-container">
 
-
-        <!-- LEFT SIDE - WITH TEXT          -->
+        <!-- LEFT SIDE -->
         <div class="login-left">
             <div class="orb1"></div>
             <div class="orb2"></div>
 
             <div class="content">
-                <!-- Brand -->
                 <div class="brand">
-                    <span class="brand-icon">GI</span>
-                    <span class="brand-text"><span>GI</span>HRPlatform</span>
-                    <span class="brand-sub">GEMS Pathways</span>
+                    <img src="{{ asset('img/ITA-GEMS-Pathway-HRMS-Portal-Logo.png') }}" alt="GI HR Platform">
                 </div>
 
-                <!-- Heading -->
                 <h1>
                     Attendance & HR<br>
                     <span class="highlight">Made Effortless</span>
@@ -34,7 +27,6 @@
                     and role-based access — for employees, managers, and administrators.
                 </p>
 
-                <!-- Features -->
                 <div class="features">
                     <div class="item">
                         <i class="bi bi-clock-history"></i>
@@ -56,9 +48,7 @@
             </div>
         </div>
 
-
-        <!-- RIGHT SIDE - LOGIN FORM                 -->
-
+        <!-- RIGHT SIDE - LOGIN FORM -->
         <div class="login-right">
 
             <div class="welcome-text">
@@ -66,7 +56,6 @@
                 <p>Sign in with your work credentials to continue.</p>
             </div>
 
-            <!-- Alert Messages -->
             @if(session('success'))
                 <div class="alert-custom alert-success">
                     <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
@@ -87,8 +76,6 @@
                 </div>
             @endif
 
-            <!-- Login Form -->
-
             <form method="POST" action="{{ route('login.post') }}">
                 @csrf
 
@@ -97,7 +84,6 @@
                     <input type="email" id="email" name="email" placeholder="faraz@gems.edu" required>
                 </div>
 
-                {{-- ===== PASSWORD WITH EYE ICON ===== --}}
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="password-input-wrapper">
@@ -113,31 +99,30 @@
                 </button>
             </form>
 
-
         </div>
 
     </div>
 
     <script>
-        function togglePassword() {
-            var passwordInput = document.getElementById('password');
-            var icon = document.getElementById('passwordIcon');
-
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.className = 'bi bi-eye-slash';
-            } else {
-                passwordInput.type = 'password';
-                icon.className = 'bi bi-eye';
-            }
-        }
-    </script>
-    <script>
-
         history.pushState(null, null, location.href);
         window.onpopstate = function () {
             history.go(1);
         };
+
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const icon = document.getElementById('passwordIcon');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
     </script>
 
 @endsection

@@ -13,55 +13,56 @@
     <div class="row">
         <div class="col-12">
             <div class="glass-card">
-                <div class="filter-bar">
+                <form method="GET" action="{{ route('admin.attendance') }}" class="filter-bar">
 
                     <div class="form-group">
                         <label>Date</label>
-                        <input type="date" class="form-control" id="filterDate" value="2026-07-18">
+                        <input type="date" class="form-control" name="date" value="{{ $date }}">
                     </div>
 
                     <div class="form-group">
                         <label>Department</label>
-                        <select class="form-control" id="filterDepartment">
+                        <select class="form-control" name="department">
                             <option value="all">All Departments</option>
-                            <option value="ICT">ICT</option>
-                            <option value="Engineering">Engineering</option>
-                            <option value="HR">HR</option>
-                            <option value="Finance">Finance</option>
-                            <option value="Marketing">Marketing</option>
-                            <option value="Operations">Operations</option>
+                            @foreach ($departments as $dept)
+                                <option value="{{ $dept->name }}"
+                                    {{ $filters['department'] == $dept->name ? 'selected' : '' }}>
+                                    {{ $dept->name }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div class="form-group">
                         <label>Status</label>
-                        <select class="form-control" id="filterStatus">
+                        <select class="form-control" name="status">
                             <option value="all">All Status</option>
-                            <option value="Present">Present</option>
-                            <option value="Absent">Absent</option>
-                            <option value="Late">Late</option>
-                            <option value="Leave">Leave</option>
+                            @foreach (['Present', 'Late', 'Early Out', 'Half Day', 'Missing Punch'] as $option)
+                                <option value="{{ $option }}" @selected($filters['status'] === $option)>{{ $option }}</option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div class="form-group" style="flex: 2;">
                         <label>Search</label>
-                        <input type="text" class="form-control" id="filterSearch" placeholder="Name or ID">
+                        <input type="text" class="form-control" name="search" placeholder="Name or ID"
+                            value="{{ $filters['search'] }}">
                     </div>
 
                     <div class="btn-group">
-                        <button class="btn-primary-glass" data-bs-toggle="modal" data-bs-target="#markAttendanceModal">
+                        <button type="submit" class="btn-primary-glass">
+                            <i class="bi bi-funnel"></i> Filter
+                        </button>
+                        <button type="button" class="btn-primary-glass" data-bs-toggle="modal"
+                            data-bs-target="#markAttendanceModal">
                             <i class="bi bi-check2-circle"></i> Mark Attendance
                         </button>
-                        <button class="btn-outline-glass" id="exportCsvBtn">
-                            <i class="bi bi-download"></i> Export CSV
-                        </button>
-                        <button class="btn-outline-glass" id="resetFilterBtn">
+                        <a href="{{ route('admin.attendance') }}" class="btn-outline-glass">
                             <i class="bi bi-arrow-counterclockwise"></i>
-                        </button>
+                        </a>
                     </div>
 
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -73,7 +74,8 @@
         <div class="col-12">
             <div class="alert-glass">
                 <i class="bi bi-info-circle"></i>
-                <span id="nonWorkingMsg">Sat 18 Jul is a non-working day under the current policy.</span>
+                <span id="nonWorkingMsg">Showing attendance for
+                    {{ \Carbon\Carbon::parse($date)->format('D d M Y') }}</span>
             </div>
         </div>
     </div>
@@ -109,19 +111,29 @@
                                     <td><span class="employee-id">{{ $att['id'] }}</span></td>
                                     <td class="dept-cell">{{ $att['department'] }}</td>
                                     <td>
-                                        <span class="status-badge {{ strtolower($att['status']) }}">
+                                        <span class="status-badge {{ \Illuminate\Support\Str::slug($att['status']) }}">
                                             {{ $att['status'] }}
                                         </span>
+                                        @if ($att['wfh'])
+                                            <br><span style="font-size:11px; color:#2563eb;"><i class="bi bi-house-door"></i> {{ $att['wfh'] }}</span>
+                                        @endif
+                                        @if ($att['waived'])
+                                            <br><span style="font-size:11px; color:#16a34a;"><i class="bi bi-shield-check"></i> {{ $att['waived'] }}</span>
+                                        @endif
+                                        @if ($att['note'])
+                                            <br><span style="font-size:11px; color:var(--text-muted);"><i class="bi bi-info-circle"></i> {{ $att['note'] }}</span>
+                                        @endif
                                     </td>
                                     <td>{{ $att['in'] }}</td>
                                     <td>{{ $att['out'] }}</td>
                                     <td>{{ $att['net'] }}</td>
                                     <td>
-                                        @if($att['timeline'] == 'On Time')
+                                        @if ($att['timeline'] == 'On Time')
                                             <span class="timeline-on-time"><i class="bi bi-check-circle"></i>
                                                 {{ $att['timeline'] }}</span>
                                         @elseif(str_contains($att['timeline'], 'Late'))
-                                            <span class="timeline-late"><i class="bi bi-clock"></i> {{ $att['timeline'] }}</span>
+                                            <span class="timeline-late"><i class="bi bi-clock"></i>
+                                                {{ $att['timeline'] }}</span>
                                         @elseif($att['timeline'] == 'No Punch')
                                             <span class="timeline-absent"><i class="bi bi-x-circle"></i>
                                                 {{ $att['timeline'] }}</span>
@@ -147,6 +159,13 @@
                     </table>
                 </div>
 
+                @if ($records->hasPages())
+                    <div class="attendance-pagination">
+                        <span>Showing {{ $records->firstItem() }}–{{ $records->lastItem() }} of {{ $records->total() }}</span>
+                        {{ $records->onEachSide(1)->links('pagination::bootstrap-4') }}
+                    </div>
+                @endif
+
                 <div id="noResultsMessage"
                     style="display: none; padding: 30px 20px; text-align: center; color: var(--text-muted);">
                     <i class="bi bi-inbox" style="font-size: 36px; opacity: 0.3; display: block; margin-bottom: 8px;"></i>
@@ -169,32 +188,30 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form class="form-glass" id="attendanceForm">
+                    <form class="form-glass" id="attendanceForm" method="POST"
+                        action="{{ route('admin.attendance.mark') }}">
+                        @csrf
 
-                        <!-- Employee -->
                         <div class="form-group">
                             <label>Employee</label>
-                            <select class="form-control" id="modalEmployee">
+                            <select class="form-control" name="employee_id" required>
                                 <option value="">Select Employee</option>
-                                <option value="Faraz Siddiqui">Faraz Siddiqui · GP-1001</option>
-                                <option value="John Doe">John Doe · GP-1002</option>
-                                <option value="Jane Smith">Jane Smith · GP-1003</option>
-                                <option value="Mike Johnson">Mike Johnson · GP-1004</option>
-                                <option value="Sarah Lee">Sarah Lee · GP-1005</option>
-                                <option value="David Khan">David Khan · GP-1006</option>
+                                @foreach ($allEmployees as $emp)
+                                    <option value="{{ $emp->id }}">{{ $emp->first_name }} {{ $emp->last_name }} ·
+                                        {{ $emp->employee_id }}</option>
+                                @endforeach
                             </select>
                         </div>
 
-                        <!-- Date -->
                         <div class="form-group">
                             <label>Date</label>
-                            <input type="date" class="form-control" id="modalDate" value="2026-07-18">
+                            <input type="date" class="form-control" name="date" id="modalDate"
+                                value="{{ $date ?: now()->format('Y-m-d') }}" required>
                         </div>
 
-                        <!-- Day Type — Select (Fixed) -->
                         <div class="form-group">
                             <label>Day Type</label>
-                            <select class="form-control" id="modalDayType">
+                            <select class="form-control" name="day_type" id="modalDayType">
                                 <option value="present">Present (with punches)</option>
                                 <option value="wfh">Work From Home</option>
                                 <option value="onduty">On Duty / Official Tour</option>
@@ -202,26 +219,26 @@
                             </select>
                         </div>
 
-                        <!-- Punch In / Punch Out -->
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Punch In</label>
-                                    <input type="time" class="form-control" id="modalPunchIn" value="09:00">
+                                    <input type="time" class="form-control" name="punch_in" id="modalPunchIn"
+                                        value="09:00">
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Punch Out</label>
-                                    <input type="time" class="form-control" id="modalPunchOut" value="18:00">
+                                    <input type="time" class="form-control" name="punch_out" id="modalPunchOut"
+                                        value="18:00">
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Reason / Note -->
                         <div class="form-group">
                             <label>Reason / Note</label>
-                            <textarea class="form-control" id="modalNote" rows="2"
+                            <textarea class="form-control" name="note" rows="2"
                                 placeholder="e.g. Missed punch, on-site meeting, approved WFH..."></textarea>
                         </div>
 
@@ -229,7 +246,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn-save" id="saveAttendanceBtn">
+                    <button type="submit" form="attendanceForm" class="btn-save">
                         <i class="bi bi-check2"></i> Save Attendance
                     </button>
                 </div>
@@ -241,7 +258,7 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
 
             // ===== DOM Elements =====
             const filterDate = document.getElementById('filterDate');
@@ -252,7 +269,7 @@
             const tableRows = document.querySelectorAll('#attendanceTableBody tr:not(#emptyRow)');
             const emptyRow = document.getElementById('emptyRow');
             const noResultsMsg = document.getElementById('noResultsMessage');
-
+            document.getElementById('edit_grace_policy_id').value = emp.grace_policy_id ?? '';
             // ===== Filter Function =====
             function filterTable() {
                 const dept = filterDepartment.value.toLowerCase();
@@ -292,18 +309,14 @@
             filterDepartment.addEventListener('change', filterTable);
             filterStatus.addEventListener('change', filterTable);
             filterSearch.addEventListener('keyup', filterTable);
-            filterDate.addEventListener('change', function () {
+            filterDate.addEventListener('change', function() {
                 const date = this.value;
-                document.getElementById('nonWorkingMsg').textContent =
-                    date + ' — Attendance records for selected date.';
-                // Update modal date also
-                document.getElementById('modalDate').value = date;
-                filterTable();
+                window.location.href = "{{ route('admin.attendance') }}?date=" + date;
             });
 
             // ===== Reset Button =====
             if (resetBtn) {
-                resetBtn.addEventListener('click', function () {
+                resetBtn.addEventListener('click', function() {
                     filterDepartment.value = 'all';
                     filterStatus.value = 'all';
                     filterSearch.value = '';
@@ -316,13 +329,21 @@
             }
 
             // ===== Mark Attendance Modal - Pre-fill Date =====
-            document.getElementById('markAttendanceModal').addEventListener('show.bs.modal', function () {
-                const date = document.getElementById('filterDate').value;
-                document.getElementById('modalDate').value = date;
+            document.addEventListener('DOMContentLoaded', function() {
+                // Mark Attendance Modal - Pre-fill Date jab modal khule
+                const markModal = document.getElementById('markAttendanceModal');
+                if (markModal) {
+                    markModal.addEventListener('show.bs.modal', function() {
+                        const dateInput = document.querySelector('input[name="date"]');
+                        if (dateInput && !dateInput.value) {
+                            dateInput.value = new Date().toISOString().split('T')[0];
+                        }
+                    });
+                }
             });
 
             // ===== Save Attendance =====
-            document.getElementById('saveAttendanceBtn').addEventListener('click', function () {
+            document.getElementById('saveAttendanceBtn').addEventListener('click', function() {
                 const employee = document.getElementById('modalEmployee').value;
                 const date = document.getElementById('modalDate').value;
                 const punchIn = document.getElementById('modalPunchIn').value;
@@ -334,7 +355,8 @@
                     return;
                 }
 
-                alert('Attendance saved for: ' + employee + '\nDate: ' + date + '\nPunch In: ' + punchIn + '\nPunch Out: ' + punchOut + '\nNote: ' + note);
+                alert('Attendance saved for: ' + employee + '\nDate: ' + date + '\nPunch In: ' + punchIn +
+                    '\nPunch Out: ' + punchOut + '\nNote: ' + note);
 
                 // Close modal
                 const modal = bootstrap.Modal.getInstance(document.getElementById('markAttendanceModal'));
@@ -342,7 +364,7 @@
             });
 
             // ===== Export CSV =====
-            document.getElementById('exportCsvBtn').addEventListener('click', function () {
+            document.getElementById('exportCsvBtn').addEventListener('click', function() {
                 alert('Export CSV functionality will be implemented.');
             });
 

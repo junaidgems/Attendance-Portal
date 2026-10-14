@@ -10,114 +10,146 @@
 @section('content')
 
 
-<!-- APPROVALS PAGE                            -->
+<!-- APPROVALS PAGE  -->
+@php
+    $tabs = [
+        'corrections' => ['title' => 'Correction Requests', 'icon' => 'bi-pencil-square', 'items' => $corrections, 'empty' => 'No pending correction requests'],
+        'leaves' => ['title' => 'Leave Requests', 'icon' => 'bi-calendar-check', 'items' => $leaves, 'empty' => 'No pending leave requests'],
+        'waivers' => ['title' => 'Deduction Waiver Requests', 'icon' => 'bi-shield-minus', 'items' => $waivers, 'empty' => 'No pending waiver requests'],
+        'wfh' => ['title' => 'Work From Home', 'icon' => 'bi-house-door', 'items' => $wfh, 'empty' => 'No pending Work From Home requests'],
+    ];
+@endphp
+
 <div class="row">
     <div class="col-12">
         <div class="glass-card">
 
             <!-- ===== TABS ===== -->
             <div class="approval-tabs" id="approvalTabs">
-                <button class="tab-btn active" data-tab="corrections">
-                    <i class="bi bi-pencil-square"></i> Correction Requests
-                    <span class="badge-count">2</span>
-                </button>
-                <button class="tab-btn" data-tab="leaves">
-                    <i class="bi bi-calendar-check"></i> Leave Requests
-                    <span class="badge-count">1</span>
-                </button>
-                <button class="tab-btn" data-tab="waivers">
-                    <i class="bi bi-shield-minus"></i> Deduction Waiver Requests
-                    <span class="badge-count">0</span>
+                @foreach ($tabs as $key => $tab)
+                    <button class="tab-btn {{ $loop->first ? 'active' : '' }}" data-tab="{{ $key }}">
+                        <i class="bi {{ $tab['icon'] }}"></i> {{ $tab['title'] }}
+                        <span class="badge-count">{{ $tab['items']->count() }}</span>
+                    </button>
+                @endforeach
+                <button class="tab-btn" data-tab="history">
+                    <i class="bi bi-clock-history"></i> History
+                    <span class="badge-count">{{ $history->count() }}</span>
                 </button>
             </div>
 
-            
-            <!-- TAB 1: CORRECTION REQUESTS                -->
-         
-            <div class="tab-content active" id="tab-corrections">
+            @foreach ($tabs as $key => $tab)
+                <div class="tab-content {{ $loop->first ? 'active' : '' }}" id="tab-{{ $key }}">
+
+                    <div class="section-header">
+                        <h6>{{ $tab['title'] }}</h6>
+                        <span class="sub">{{ $tab['items']->count() }} pending</span>
+                    </div>
+
+                    @forelse ($tab['items'] as $item)
+                        <div class="approval-item"
+                            data-employee="{{ $item['employee'] }}"
+                            data-date="{{ $item['date'] }}"
+                            data-detail="{{ $item['detail'] }}"
+                            data-reason="{{ $item['reason'] }}"
+                            data-kind="{{ $item['kind'] }}"
+                            data-approve-url="{{ route('manager.approvals.' . $item['kind'] . '.approve', $item['id']) }}"
+                            data-reject-url="{{ route('manager.approvals.' . $item['kind'] . '.reject', $item['id']) }}">
+                            <div class="info">
+                                <div class="avatar-sm">{{ $item['avatar'] }}</div>
+                                <div class="details">
+                                    <div class="name">{{ $item['employee'] }}</div>
+                                    <div class="meta"><i class="bi bi-calendar"></i> {{ $item['date'] }} · {{ $item['detail'] }}</div>
+                                    @if ($item['extra'])
+                                        <div class="meta"><i class="bi bi-clock"></i> {{ $item['extra'] }}</div>
+                                    @endif
+                                    @if ($item['document_url'] ?? null)
+                                        <div class="meta"><a href="{{ $item['document_url'] }}" target="_blank"><i class="bi bi-paperclip"></i> View document</a></div>
+                                    @endif
+                                </div>
+                                <span class="reason" title="{{ $item['reason'] }}"><i class="bi bi-chat"></i> "{{ $item['reason'] }}"</span>
+                            </div>
+                            <div class="actions">
+                                <button type="button" class="btn-approve" onclick="openModal('approve', this)"><i class="bi bi-check2"></i> Approve</button>
+                                <button type="button" class="btn-reject" onclick="openModal('reject', this)"><i class="bi bi-x"></i> Reject</button>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="empty-state">
+                            <i class="bi bi-check-circle"></i>
+                            <h6>{{ $tab['empty'] }}</h6>
+                            <p>All requests from your team have been reviewed.</p>
+                        </div>
+                    @endforelse
+
+                </div>
+            @endforeach
+
+            <!-- TAB: HISTORY (Manager decision + Admin final decision) -->
+            @php
+                $statusLabels = [
+                    'approved' => 'Approved',
+                    'rejected' => 'Rejected',
+                    'awaiting_admin' => 'Awaiting Admin',
+                    'pending' => 'Pending',
+                ];
+            @endphp
+            <div class="tab-content" id="tab-history">
 
                 <div class="section-header">
-                    <h6>Correction Requests</h6>
-                    <span class="sub">2 pending</span>
+                    <h6>History</h6>
+                    <span class="sub">{{ $history->count() }} reviewed requests</span>
                 </div>
 
-                <!-- Correction Item 1 -->
-                <div class="approval-item" data-id="1" data-type="correction" data-employee="John Doe" data-date="22 Jul 2026" data-detail="Missing Punch" data-reason="Forgot to punch in">
-                    <div class="info">
-                        <div class="avatar-sm">JD</div>
-                        <div class="details">
-                            <div class="name">John Doe</div>
-                            <div class="meta"><i class="bi bi-calendar"></i> 22 Jul 2026 · Missing Punch</div>
+                @forelse ($history as $item)
+                    <div class="approval-item history-item">
+                        <div class="info">
+                            <div class="avatar-sm">{{ $item['avatar'] }}</div>
+                            <div class="details">
+                                <div class="name">{{ $item['employee'] }}</div>
+                                <div class="meta">
+                                    <i class="bi bi-tag"></i> {{ $item['type'] }}
+                                    · <i class="bi bi-calendar"></i> {{ $item['date'] }} · {{ $item['detail'] }}
+                                </div>
+                                @if ($item['reason'])
+                                    <div class="meta"><i class="bi bi-chat"></i> "{{ $item['reason'] }}"</div>
+                                @endif
+
+                                <div class="history-decisions">
+                                    @if ($item['lm_status'])
+                                        <div class="history-decision">
+                                            <span class="history-badge {{ $item['lm_status'] }}">Manager: {{ $statusLabels[$item['lm_status']] }}</span>
+                                            @if ($item['lm_note'])
+                                                <span class="history-note">"{{ $item['lm_note'] }}"</span>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    @if ($item['admin_by'] || $item['final_status'] === 'awaiting_admin')
+                                        <div class="history-decision">
+                                            <span class="history-badge {{ $item['final_status'] }}">Admin: {{ $statusLabels[$item['final_status']] ?? ucfirst($item['final_status']) }}</span>
+                                            @if ($item['admin_note'])
+                                                <span class="history-note">"{{ $item['admin_note'] }}"</span>
+                                            @endif
+                                            @if ($item['admin_by'])
+                                                <span class="history-by">by {{ $item['admin_by'] }}</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
-                        <span class="reason"><i class="bi bi-clock"></i> Requested: 09:15 — "Forgot to punch in"</span>
-                    </div>
-                    <div class="actions">
-                        <button class="btn-approve" data-bs-toggle="modal" data-bs-target="#approveModal" onclick="openModal('approve', this)"><i class="bi bi-check2"></i> Approve</button>
-                        <button class="btn-reject" data-bs-toggle="modal" data-bs-target="#rejectModal" onclick="openModal('reject', this)"><i class="bi bi-x"></i> Reject</button>
-                    </div>
-                </div>
-
-                <!-- Correction Item 2 -->
-                <div class="approval-item" data-id="2" data-type="correction" data-employee="Jane Smith" data-date="22 Jul 2026" data-detail="Late Punch" data-reason="Traffic jam">
-                    <div class="info">
-                        <div class="avatar-sm">JS</div>
-                        <div class="details">
-                            <div class="name">Jane Smith</div>
-                            <div class="meta"><i class="bi bi-calendar"></i> 22 Jul 2026 · Late Punch</div>
+                        <div class="actions">
+                            <span class="history-by">{{ $item['updated_at']?->format('d M Y, h:i A') }}</span>
                         </div>
-                        <span class="reason"><i class="bi bi-clock"></i> Requested: 10:30 — "Traffic jam"</span>
                     </div>
-                    <div class="actions">
-                        <button class="btn-approve" data-bs-toggle="modal" data-bs-target="#approveModal" onclick="openModal('approve', this)"><i class="bi bi-check2"></i> Approve</button>
-                        <button class="btn-reject" data-bs-toggle="modal" data-bs-target="#rejectModal" onclick="openModal('reject', this)"><i class="bi bi-x"></i> Reject</button>
+                @empty
+                    <div class="empty-state">
+                        <i class="bi bi-clock-history"></i>
+                        <h6>No history yet</h6>
+                        <p>Requests you review will appear here with the Admin's final decision.</p>
                     </div>
-                </div>
-
-            </div>
-
-           
-            <!-- TAB 2: LEAVE REQUESTS                     -->
-            
-            <div class="tab-content" id="tab-leaves">
-
-                <div class="section-header">
-                    <h6>Leave Requests</h6>
-                    <span class="sub">1 pending</span>
-                </div>
-
-                <!-- Leave Item 1 -->
-                <div class="approval-item" data-id="1" data-type="leave" data-employee="Mike Johnson" data-date="25-27 Jul 2026" data-detail="Annual Leave" data-reason="Family event">
-                    <div class="info">
-                        <div class="avatar-sm">MK</div>
-                        <div class="details">
-                            <div class="name">Mike Johnson</div>
-                            <div class="meta"><i class="bi bi-calendar"></i> 25-27 Jul 2026 · Annual Leave</div>
-                        </div>
-                        <span class="reason"><i class="bi bi-chat"></i> "Family event"</span>
-                    </div>
-                    <div class="actions">
-                        <button class="btn-approve" data-bs-toggle="modal" data-bs-target="#approveModal" onclick="openModal('approve', this)"><i class="bi bi-check2"></i> Approve</button>
-                        <button class="btn-reject" data-bs-toggle="modal" data-bs-target="#rejectModal" onclick="openModal('reject', this)"><i class="bi bi-x"></i> Reject</button>
-                    </div>
-                </div>
-
-            </div>
-
-         
-            <!-- TAB 3: DEDUCTION WAIVER REQUESTS          -->
-           
-            <div class="tab-content" id="tab-waivers">
-
-                <div class="section-header">
-                    <h6>Deduction Waiver Requests</h6>
-                    <span class="sub">0 pending</span>
-                </div>
-
-                <div class="empty-state">
-                    <i class="bi bi-check-circle"></i>
-                    <h6>No pending waiver requests</h6>
-                    <p>All waiver requests have been reviewed.</p>
-                </div>
+                @endforelse
 
             </div>
 
@@ -125,21 +157,17 @@
     </div>
 </div>
 
-<!-- APPROVE MODAL                             -->
+<!-- APPROVE MODAL -->
 <div class="modal fade modal-glass" id="approveModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-check2-circle" style="color:#22c55e;"></i> Approve Request</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="approveForm">
-                    <input type="hidden" id="approveAction" value="approve">
-                    <input type="hidden" id="approveEmployee" value="">
-                    <input type="hidden" id="approveType" value="">
-                    <input type="hidden" id="approveId" value="">
-
+            <form method="POST" id="approveForm" action="">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-check2-circle" style="color:#22c55e;"></i> Approve Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
                     <div class="request-preview">
                         <div class="label">Employee</div>
                         <div class="value" id="approveEmployeeName">—</div>
@@ -150,37 +178,32 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Manager Note (Optional)</label>
-                        <textarea class="form-control-custom" id="approveNote" rows="2" placeholder="Add a note for the employee..."></textarea>
+                        <label>Manager Note <span id="approveNoteHint">(Optional)</span></label>
+                        <textarea class="form-control-custom" name="note" id="approveNote" rows="2" maxlength="500"
+                            placeholder="Add a note for the employee and Admin..."></textarea>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn-save approve" onclick="submitApproval('approve')">
-                    <i class="bi bi-check2"></i> Approve
-                </button>
-            </div>
+                    <p id="approveForwardHint" style="font-size:12px; color:var(--text-muted); margin:0;"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-save approve"><i class="bi bi-check2"></i> Approve</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
 
-
-<!-- REJECT MODAL                              -->
+<!-- REJECT MODAL -->
 <div class="modal fade modal-glass" id="rejectModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="bi bi-x-circle" style="color:#ef4444;"></i> Reject Request</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <form id="rejectForm">
-                    <input type="hidden" id="rejectAction" value="reject">
-                    <input type="hidden" id="rejectEmployee" value="">
-                    <input type="hidden" id="rejectType" value="">
-                    <input type="hidden" id="rejectId" value="">
-
+            <form method="POST" id="rejectForm" action="">
+                @csrf
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="bi bi-x-circle" style="color:#ef4444;"></i> Reject Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
                     <div class="request-preview">
                         <div class="label">Employee</div>
                         <div class="value" id="rejectEmployeeName">—</div>
@@ -192,16 +215,15 @@
 
                     <div class="form-group">
                         <label>Reason for Rejection <span style="color:#ef4444;">*</span></label>
-                        <textarea class="form-control-custom" id="rejectNote" rows="2" placeholder="Please provide a reason for rejection..." required></textarea>
+                        <textarea class="form-control-custom" name="note" id="rejectNote" rows="2" maxlength="500"
+                            placeholder="Please provide a reason for rejection..." required></textarea>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn-save reject" onclick="submitApproval('reject')">
-                    <i class="bi bi-x"></i> Reject
-                </button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-save reject"><i class="bi bi-x"></i> Reject</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -212,107 +234,44 @@
 <script>
     // ===== TABS =====
     const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = {
-        corrections: document.getElementById('tab-corrections'),
-        leaves: document.getElementById('tab-leaves'),
-        waivers: document.getElementById('tab-waivers'),
-    };
 
     tabBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             tabBtns.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
 
-            Object.values(tabContents).forEach(content => {
-                content.classList.remove('active');
-            });
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-            const tab = this.dataset.tab;
-            if (tabContents[tab]) {
-                tabContents[tab].classList.add('active');
+            const target = document.getElementById('tab-' + this.dataset.tab);
+            if (target) {
+                target.classList.add('active');
             }
         });
     });
 
-    // ===== OPEN MODAL =====
+    // ===== OPEN APPROVE / REJECT MODAL =====
     function openModal(action, btn) {
         const item = btn.closest('.approval-item');
-        const employee = item.dataset.employee || '—';
-        const date = item.dataset.date || '—';
-        const detail = item.dataset.detail || '—';
-        const reason = item.dataset.reason || '—';
-        const type = item.dataset.type || '—';
-        const id = item.dataset.id || '—';
-
         const prefix = action === 'approve' ? 'approve' : 'reject';
+        const form = document.getElementById(prefix + 'Form');
 
-        document.getElementById(prefix + 'EmployeeName').textContent = employee;
-        document.getElementById(prefix + 'RequestDetails').textContent = date + ' · ' + detail;
-        document.getElementById(prefix + 'RequestReason').textContent = '"' + reason + '"';
-        document.getElementById(prefix + 'Employee').value = employee;
-        document.getElementById(prefix + 'Type').value = type;
-        document.getElementById(prefix + 'Id').value = id;
+        form.reset();
+        form.action = action === 'approve' ? item.dataset.approveUrl : item.dataset.rejectUrl;
 
-        if (action === 'reject') {
-            document.getElementById('rejectNote').value = '';
-        } else {
-            document.getElementById('approveNote').value = '';
+        document.getElementById(prefix + 'EmployeeName').textContent = item.dataset.employee || '—';
+        document.getElementById(prefix + 'RequestDetails').textContent = (item.dataset.date || '—') + ' · ' + (item.dataset.detail || '—');
+        document.getElementById(prefix + 'RequestReason').textContent = '"' + (item.dataset.reason || '—') + '"';
+
+        if (action === 'approve') {
+            // Waiver recommendations require a note; leave and waiver approvals go on to Admin.
+            const noteRequired = item.dataset.kind === 'waiver';
+            document.getElementById('approveNote').required = noteRequired;
+            document.getElementById('approveNoteHint').textContent = noteRequired ? '*' : '(Optional)';
+            document.getElementById('approveForwardHint').textContent =
+                'After your approval, this request will be sent to Admin for the final decision.';
         }
+
+        new bootstrap.Modal(document.getElementById(prefix + 'Modal')).show();
     }
-
-    // ===== SUBMIT APPROVAL =====
-    function submitApproval(action) {
-        const prefix = action === 'approve' ? 'approve' : 'reject';
-        const employee = document.getElementById(prefix + 'Employee').value;
-        const type = document.getElementById(prefix + 'Type').value;
-        const id = document.getElementById(prefix + 'Id').value;
-        const note = document.getElementById(prefix + 'Note').value;
-
-        if (action === 'reject' && !note.trim()) {
-            toastr.warning('Please provide a reason for rejection.');
-            return;
-        }
-
-        // Close modal
-        const modalId = action === 'approve' ? '#approveModal' : '#rejectModal';
-        const modal = bootstrap.Modal.getInstance(document.querySelector(modalId));
-        if (modal) modal.hide();
-
-        // Show success
-        const msg = action === 'approve' 
-            ? 'Request approved successfully!' 
-            : 'Request rejected!';
-        toastr.success(msg);
-
-        // Find and remove item
-        const items = document.querySelectorAll('.approval-item');
-        items.forEach(item => {
-            if (item.dataset.id === id && item.dataset.type === type) {
-                item.style.opacity = '0.3';
-                item.style.pointerEvents = 'none';
-                setTimeout(() => { item.style.display = 'none'; }, 500);
-            }
-        });
-
-        // Update badge count
-        const activeTab = document.querySelector('.tab-btn.active');
-        if (activeTab) {
-            const badge = activeTab.querySelector('.badge-count');
-            if (badge) {
-                const current = parseInt(badge.textContent) || 0;
-                if (current > 0) {
-                    badge.textContent = current - 1;
-                }
-            }
-        }
-    }
-
-    // Reset modals on close
-    document.querySelectorAll('.modal').forEach(modal => {
-        modal.addEventListener('hidden.bs.modal', function() {
-            const textareas = this.querySelectorAll('textarea');
-            textareas.forEach(ta => ta.value = '');
-        });
-    });
 </script>
 @endpush

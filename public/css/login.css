@@ -106,10 +106,18 @@ body {
 
 /* Brand */
 .login-left .brand {
+    width: 300px;
+    overflow: hidden;
     display: flex;
     align-items: center;
     gap: 12px;
     margin-bottom: 40px;
+}
+
+.login-left .brand img {
+    width: 100%;
+    height:100%;
+    object-fit: cover;
 }
 
 .login-left .brand-icon {

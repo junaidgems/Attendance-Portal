@@ -14,16 +14,12 @@ class RedirectIfAuthenticated
         $guards = empty($guards) ? [null] : $guards;
 
         foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                $role = session('user_role', 'employee');
-                $routes = [
-                    'administrator' => 'admin.dashboard',
-                    'director' => 'director.dashboard',
-                    'manager' => 'manager.dashboard',
-                    'line_manager' => 'line_manager.dashboard',
-                    'employee' => 'employee.dashboard',
-                ];
-                return redirect()->route($routes[$role] ?? 'employee.dashboard');
+            $user = Auth::guard($guard)->user();
+
+            // Active user with a valid role goes to their own dashboard; anyone else reaches the
+            // login page, which logs them out.
+            if ($user && $user->isActive() && $user->dashboardRoute()) {
+                return redirect()->route($user->dashboardRoute());
             }
         }
 

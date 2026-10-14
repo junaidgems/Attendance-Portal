@@ -259,6 +259,16 @@
             color: #dc2626;
         }
 
+        .status-badge-sm.on-leave {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .status-badge-sm.holiday {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+
         [data-theme="dark"] .status-badge-sm.present {
             background: #064e3b;
             color: #34d399;
@@ -420,106 +430,78 @@
         </span>
     </div>
 
-  
+
     <!-- FILTER BAR                                -->
     <div class="row">
         <div class="col-12">
             <div class="glass-card">
                 <form method="GET" action="{{ route('admin.attendance.breakdown') }}">
                     <div class="filter-bar">
-
                         <div class="form-group">
                             <label>From</label>
-                            <input type="date" class="form-control" name="from" value="2026-07-12">
+                            <input type="date" class="form-control" name="from" value="{{ $from }}" max="{{ now()->format('Y-m-d') }}">
                         </div>
-
                         <div class="form-group">
                             <label>To</label>
-                            <input type="date" class="form-control" name="to" value="2026-07-20">
+                            <input type="date" class="form-control" name="to" value="{{ $to }}" max="{{ now()->format('Y-m-d') }}">
                         </div>
-
                         <div class="form-group">
                             <label>Department</label>
                             <select class="form-control" name="department">
-                                <option value="all">All departments</option>
-                                <option value="ICT">ICT</option>
-                                <option value="Engineering">Engineering</option>
-                                <option value="HR">HR</option>
-                                <option value="Finance">Finance</option>
-                                <option value="Marketing">Marketing</option>
+                                <option value="all" {{ $department == 'all' ? 'selected' : '' }}>All departments</option>
+                                @foreach($departments as $dept)
+                                    <option value="{{ $dept->name }}" {{ $department == $dept->name ? 'selected' : '' }}>
+                                        {{ $dept->name }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
-
                         <div class="form-group" style="flex:1.5;">
                             <label>Search</label>
-                            <input type="text" class="form-control" name="search" placeholder="Name or Employee ID">
+                            <input type="text" class="form-control" name="search" placeholder="Name or Employee ID"
+                                value="{{ $search }}">
                         </div>
-
                         <div class="btn-group">
                             <button type="submit" class="btn-primary-glass"><i class="bi bi-funnel"></i> Filter</button>
                             <a href="{{ route('admin.attendance.breakdown') }}" class="btn-outline-glass"><i
                                     class="bi bi-arrow-counterclockwise"></i> Clear</a>
-                            <button class="btn-outline-glass" onclick="alert('Export CSV coming soon!')"><i
-                                    class="bi bi-download"></i> Export CSV</button>
+                            <a href="{{ route('admin.attendance.breakdown.export', ['from' => $from, 'to' => $to, 'department' => $department, 'search' => $search, 'tab' => 'all']) }}"
+                                class="btn-outline-glass" id="exportLink"><i class="bi bi-download"></i> Export CSV</a>
                         </div>
-
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    
+
+    @php
+        $tabs = [
+            'all' => 'All records',
+            'missing' => 'Missing Punch',
+            'halfday' => 'Half Day',
+            'earlyout' => 'Early Out',
+            'absent' => 'Absent',
+            'late' => 'Late',
+            'present' => 'Present',
+            'onleave' => 'On Leave',
+        ];
+    @endphp
+
     <!-- BOOTSTRAP TABS — STATS                    -->
     <div class="row">
         <div class="col-12">
             <div class="glass-card" style="padding-bottom:4px;">
-
                 <ul class="nav nav-tabs nav-tabs-custom" id="statsTabs" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all"
-                            type="button" role="tab">
-                            <span class="num">2</span> All records
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="missing-tab" data-bs-toggle="tab" data-bs-target="#missing"
-                            type="button" role="tab">
-                            <span class="num">0</span> Missing Punch
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="halfday-tab" data-bs-toggle="tab" data-bs-target="#halfday"
-                            type="button" role="tab">
-                            <span class="num">0</span> Half Day
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="earlyout-tab" data-bs-toggle="tab" data-bs-target="#earlyout"
-                            type="button" role="tab">
-                            <span class="num">0</span> Early Out
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="absent-tab" data-bs-toggle="tab" data-bs-target="#absent" type="button"
-                            role="tab">
-                            <span class="num">2</span> Absent
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="late-tab" data-bs-toggle="tab" data-bs-target="#late" type="button"
-                            role="tab">
-                            <span class="num">0</span> Late
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="present-tab" data-bs-toggle="tab" data-bs-target="#present"
-                            type="button" role="tab">
-                            <span class="num">0</span> Present
-                        </button>
-                    </li>
+                    @foreach ($tabs as $key => $label)
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {{ $loop->first ? 'active' : '' }}" id="{{ $key }}-tab" data-bs-toggle="tab"
+                                data-bs-target="#{{ $key }}" data-export-tab="{{ $key }}" type="button" role="tab">
+                                <span class="num">{{ $grouped[$key]->count() }}</span> {{ $label }}
+                            </button>
+                        </li>
+                    @endforeach
                 </ul>
-
             </div>
         </div>
     </div>
@@ -528,203 +510,109 @@
     <div class="row" style="margin-top:16px;">
         <div class="col-12">
             <div class="glass-card">
-
                 <div class="tab-content">
-
-                    <!-- ===== ALL RECORDS ===== -->
-                    <div class="tab-pane fade show active" id="all" role="tabpanel">
-                        <div class="section-header">
-                            <div>
-                                <h6>All Records</h6>
-                                <span class="subtitle">2 records</span>
+                    @foreach ($tabs as $key => $label)
+                        <div class="tab-pane fade {{ $loop->first ? 'show active' : '' }}" id="{{ $key }}" role="tabpanel">
+                            <div class="section-header">
+                                <div>
+                                    <h6>{{ $key === 'all' ? 'All Records' : $label }}</h6>
+                                    <span class="subtitle">{{ $grouped[$key]->count() }} {{ $grouped[$key]->count() === 1 ? 'record' : 'records' }}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Employee</th>
-                                        <th>Emp ID</th>
-                                        <th>Department</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Shift</th>
-                                        <th>Scheduled</th>
-                                        <th>IN</th>
-                                        <th>OUT</th>
-                                        <th>Worked</th>
-                                        <th>Late</th>
-                                        <th>Early</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Junaid</strong></td>
-                                        <td>GP-1002</td>
-                                        <td>ICT</td>
-                                        <td>Mon 13 Jul</td>
-                                        <td><span class="status-badge-sm absent">Absent</span></td>
-                                        <td><span class="shift-badge">Standard Shift</span></td>
-                                        <td>09:00-17:00</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Junaid</strong></td>
-                                        <td>GP-1002</td>
-                                        <td>ICT</td>
-                                        <td>Tue 14 Jul</td>
-                                        <td><span class="status-badge-sm absent">Absent</span></td>
-                                        <td><span class="shift-badge">Standard Shift</span></td>
-                                        <td>09:00-17:00</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
 
-                    <!-- ===== MISSING PUNCH ===== -->
-                    <div class="tab-pane fade" id="missing" role="tabpanel">
-                        <div class="section-header">
-                            <div>
-                                <h6>Missing Punch</h6>
-                                <span class="subtitle">0 records</span>
-                            </div>
-                        </div>
-                        <div class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <p>No records match these filters.</p>
-                        </div>
-                    </div>
+                            @if ($grouped[$key]->isEmpty())
+                                <div class="empty-state"><i class="bi bi-inbox"></i>
+                                    <p>No records match these filters.</p>
+                                </div>
+                            @else
+                                <div class="table-wrap">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Employee</th>
+                                                <th>Emp ID</th>
+                                                <th>Department</th>
+                                                <th>Date</th>
+                                                <th>Status</th>
+                                                <th>Shift</th>
+                                                <th>Scheduled</th>
+                                                <th>IN</th>
+                                                <th>OUT</th>
+                                                <th>Worked</th>
+                                                <th>Late</th>
+                                                <th>Early</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($pages[$key] as $row)
+                                                <tr>
+                                                    <td><strong>{{ $row['employee'] }}</strong></td>
+                                                    <td>{{ $row['emp_id'] }}</td>
+                                                    <td>{{ $row['department'] }}</td>
+                                                    <td>{{ $row['date'] }}</td>
+                                                    <td>
+                                                        <span class="status-badge-sm {{ \Illuminate\Support\Str::slug($row['status']) }}">{{ $row['status'] }}</span>
+                                                        @if ($row['remarks'] !== $row['status'] && ! in_array($row['remarks'], ['On Time', '—'], true))
+                                                            <br><span style="font-size:10px; color:var(--text-muted);">{{ $row['remarks'] }}</span>
+                                                        @endif
+                                                    </td>
+                                                    <td><span class="shift-badge">{{ $row['shift'] }}</span></td>
+                                                    <td>{{ $row['scheduled'] }}</td>
+                                                    <td>{{ $row['in'] }}</td>
+                                                    <td>{{ $row['out'] }}</td>
+                                                    <td>{{ $row['worked'] }}</td>
+                                                    <td>{{ $row['late'] }}</td>
+                                                    <td>{{ $row['early'] }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
 
-                    <!-- ===== HALF DAY ===== -->
-                    <div class="tab-pane fade" id="halfday" role="tabpanel">
-                        <div class="section-header">
-                            <div>
-                                <h6>Half Day</h6>
-                                <span class="subtitle">0 records</span>
-                            </div>
+                                @if ($pages[$key]->hasPages())
+                                    <div class="breakdown-pagination" style="margin-top:14px; font-size:13px;">
+                                        {{ $pages[$key]->onEachSide(1)->links('pagination::bootstrap-5') }}
+                                    </div>
+                                @endif
+                            @endif
                         </div>
-                        <div class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <p>No records match these filters.</p>
-                        </div>
-                    </div>
-
-                    <!-- ===== EARLY OUT ===== -->
-                    <div class="tab-pane fade" id="earlyout" role="tabpanel">
-                        <div class="section-header">
-                            <div>
-                                <h6>Early Out</h6>
-                                <span class="subtitle">0 records</span>
-                            </div>
-                        </div>
-                        <div class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <p>No records match these filters.</p>
-                        </div>
-                    </div>
-
-                    <!-- ===== ABSENT ===== -->
-                    <div class="tab-pane fade" id="absent" role="tabpanel">
-                        <div class="section-header">
-                            <div>
-                                <h6>Absent</h6>
-                                <span class="subtitle">2 records</span>
-                            </div>
-                        </div>
-                        <div class="table-wrap">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>Employee</th>
-                                        <th>Emp ID</th>
-                                        <th>Department</th>
-                                        <th>Date</th>
-                                        <th>Status</th>
-                                        <th>Shift</th>
-                                        <th>Scheduled</th>
-                                        <th>IN</th>
-                                        <th>OUT</th>
-                                        <th>Worked</th>
-                                        <th>Late</th>
-                                        <th>Early</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><strong>Junaid</strong></td>
-                                        <td>GP-1002</td>
-                                        <td>ICT</td>
-                                        <td>Mon 13 Jul</td>
-                                        <td><span class="status-badge-sm absent">Absent</span></td>
-                                        <td><span class="shift-badge">Standard Shift</span></td>
-                                        <td>09:00-17:00</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                    </tr>
-                                    <tr>
-                                        <td><strong>Junaid</strong></td>
-                                        <td>GP-1002</td>
-                                        <td>ICT</td>
-                                        <td>Tue 14 Jul</td>
-                                        <td><span class="status-badge-sm absent">Absent</span></td>
-                                        <td><span class="shift-badge">Standard Shift</span></td>
-                                        <td>09:00-17:00</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                        <td>—</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- ===== LATE ===== -->
-                    <div class="tab-pane fade" id="late" role="tabpanel">
-                        <div class="section-header">
-                            <div>
-                                <h6>Late</h6>
-                                <span class="subtitle">0 records</span>
-                            </div>
-                        </div>
-                        <div class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <p>No records match these filters.</p>
-                        </div>
-                    </div>
-
-                    <!-- ===== PRESENT ===== -->
-                    <div class="tab-pane fade" id="present" role="tabpanel">
-                        <div class="section-header">
-                            <div>
-                                <h6>Present</h6>
-                                <span class="subtitle">0 records</span>
-                            </div>
-                        </div>
-                        <div class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <p>No records match these filters.</p>
-                        </div>
-                    </div>
-
+                    @endforeach
                 </div>
-
             </div>
         </div>
     </div>
 
 @endsection
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const exportLink = document.getElementById('exportLink');
+            const tabMap = {
+                'missing-punch': 'missing-tab',
+                'half-day': 'halfday-tab',
+                'early-out': 'earlyout-tab',
+                'absent': 'absent-tab',
+                'late': 'late-tab',
+                'present': 'present-tab',
+                'on-leave': 'onleave-tab'
+            };
+
+            // Export follows the currently open tab
+            document.querySelectorAll('#statsTabs [data-export-tab]').forEach(function (btn) {
+                btn.addEventListener('shown.bs.tab', function () {
+                    const url = new URL(exportLink.href);
+                    url.searchParams.set('tab', btn.dataset.exportTab);
+                    exportLink.href = url.toString();
+                });
+            });
+
+            // Open the tab from ?type= (dashboard cards and pagination links)
+            const type = new URLSearchParams(window.location.search).get('type');
+            const tabButton = tabMap[type] ? document.getElementById(tabMap[type]) : null;
+            if (tabButton) {
+                bootstrap.Tab.getOrCreateInstance(tabButton).show();
+            }
+        });
+    </script>
+@endpush

@@ -70,12 +70,14 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            text-decoration: none;
         }
 
         .btn-primary-glass:hover {
             opacity: 0.85;
             transform: translateY(-1px);
             box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+            color: #fff;
         }
 
         .btn-outline-glass {
@@ -90,6 +92,7 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            text-decoration: none;
         }
 
         .btn-outline-glass:hover {
@@ -141,7 +144,7 @@
         .table-wrap {
             overflow-x: auto;
             margin-top: 4px;
-            -webkit-overflow-scrolling: touch;      
+            -webkit-overflow-scrolling: touch;
         }
 
         .table-wrap table {
@@ -160,6 +163,7 @@
             color: var(--text-muted);
             border-bottom: 2px solid var(--border-color);
             background: var(--hover-bg);
+            white-space: nowrap;
         }
 
         .table-wrap td {
@@ -169,6 +173,7 @@
             border-bottom: 1px solid var(--border-color);
             vertical-align: middle;
             text-align: left;
+            white-space: nowrap;
         }
 
         .table-wrap td:first-child {
@@ -177,6 +182,18 @@
 
         .table-wrap tr:hover td {
             background: var(--hover-bg);
+        }
+
+        .employee-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .employee-id {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: inline-block;
+            margin-top: 2px;
         }
 
         .badge-waiver-pending {
@@ -252,9 +269,11 @@
             gap: 10px !important;
         }
 
-          .table-wrap th, .table-wrap td {
-                white-space: nowrap;
-            }
+        .filter-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
         @media (max-width: 992px) {
             .filter-bar .form-group {
@@ -275,11 +294,12 @@
                 min-width: 100%;
             }
 
-            .filter-bar .btn-group {
+            .filter-actions {
                 width: 100%;
             }
 
-            .filter-bar .btn-group button {
+            .filter-actions .btn-primary-glass,
+            .filter-actions .btn-outline-glass {
                 flex: 1;
                 justify-content: center;
             }
@@ -287,9 +307,6 @@
             .summary-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
-
-          
-
         }
 
         @media (max-width: 576px) {
@@ -301,8 +318,20 @@
                 grid-template-columns: 1fr 1fr;
             }
 
+            .summary-card {
+                padding: 12px 8px;
+            }
+
             .summary-card .number {
                 font-size: 18px;
+            }
+
+            .summary-card .label {
+                font-size: 10px;
+            }
+
+            .summary-card .sub {
+                font-size: 9px;
             }
 
             .table-wrap th,
@@ -314,187 +343,503 @@
     </style>
 @endpush
 
+
 @section('content')
 
-
-    <!-- FILTER BAR   -->
+    {{-- =========================================================
+    FILTER BAR
+    ========================================================== --}}
     <div class="row">
         <div class="col-12">
+
             <div class="glass-card">
+
                 <form method="GET" action="{{ route('admin.penalty') }}" id="filterForm">
+
                     <div class="filter-bar">
 
+                        {{-- FROM DATE --}}
                         <div class="form-group">
-                            <label>From</label>
+                            <label for="filterFrom">From</label>
+
                             <input type="date" class="form-control" name="from" id="filterFrom" value="{{ $from }}">
                         </div>
 
+
+                        {{-- TO DATE --}}
                         <div class="form-group">
-                            <label>To</label>
+                            <label for="filterTo">To</label>
+
                             <input type="date" class="form-control" name="to" id="filterTo" value="{{ $to }}">
                         </div>
 
+
+                        {{-- DEPARTMENT --}}
                         <div class="form-group">
-                            <label>Department</label>
+
+                            <label for="filterDepartment">
+                                Department
+                            </label>
+
                             <select class="form-control" name="department" id="filterDepartment">
-                                <option value="all" {{ $department == 'all' ? 'selected' : '' }}>All departments</option>
-                                <option value="ICT" {{ $department == 'ICT' ? 'selected' : '' }}>ICT</option>
-                                <option value="Engineering" {{ $department == 'Engineering' ? 'selected' : '' }}>Engineering
+
+                                <option value="all" {{ $department === 'all' ? 'selected' : '' }}>
+                                    All departments
                                 </option>
-                                <option value="HR" {{ $department == 'HR' ? 'selected' : '' }}>HR</option>
-                                <option value="Finance" {{ $department == 'Finance' ? 'selected' : '' }}>Finance</option>
-                                <option value="Marketing" {{ $department == 'Marketing' ? 'selected' : '' }}>Marketing
-                                </option>
+
+                                @foreach($departments as $dept)
+
+                                    <option value="{{ $dept->name }}" {{ $department === $dept->name ? 'selected' : '' }}>
+                                        {{ $dept->name }}
+                                    </option>
+
+                                @endforeach
+
                             </select>
+
                         </div>
 
+
+                        {{-- SEARCH --}}
                         <div class="form-group" style="flex: 1.5;">
-                            <label>Search</label>
+
+                            <label for="filterSearch">
+                                Search
+                            </label>
+
                             <input type="text" class="form-control" name="search" id="filterSearch"
                                 placeholder="Name or Employee ID" value="{{ $search }}">
+
                         </div>
-                        <!-- Clear Button with Default Dates -->
-                        <a href="{{ route('admin.penalty', ['from' => '2026-06-26', 'to' => '2026-07-25']) }}"
-                            class="btn-outline-glass">
-                            <i class="bi bi-arrow-counterclockwise"></i>
-                        </a>
-                        <div class="btn-group">
-                            <!-- Filter Button -->
+
+
+                        {{-- ACTION BUTTONS --}}
+                        <div class="filter-actions">
+
+                            {{-- RESET --}}
+                            <a href="{{ route('admin.penalty') }}" class="btn-outline-glass" title="Reset filters">
+                                <i class="bi bi-arrow-counterclockwise"></i>
+                            </a>
+
+
+                            {{-- FILTER --}}
                             <button type="submit" class="btn-primary-glass">
-                                <i class="bi bi-funnel"></i> Filter
+                                <i class="bi bi-funnel"></i>
+                                Filter
                             </button>
 
 
-
-                            <!-- Export CSV -->
+                            {{-- EXPORT --}}
                             <button type="submit" formaction="{{ route('admin.penalty.export') }}"
                                 class="btn-outline-glass">
-                                <i class="bi bi-download"></i> Export CSV
+                                <i class="bi bi-download"></i>
+                                Export CSV
                             </button>
+
                         </div>
 
                     </div>
+
                 </form>
+
             </div>
+
         </div>
     </div>
 
 
-    <!-- SUMMARY CARDS    -->
-
+    {{-- =========================================================
+    SUMMARY CARDS
+    ========================================================== --}}
     <div class="row" style="margin-top: 16px;">
+
         <div class="col-12">
+
             <div class="summary-grid">
+
+                {{-- EMPLOYEES WITH PENALTIES --}}
                 <div class="summary-card">
-                    <div class="number">{{ $summary['penalties'] }}</div>
-                    <div class="label">Employees with Penalties</div>
-                    <div class="sub">this cycle</div>
+
+                    <div class="number">
+                        {{ $summary['penalties'] ?? 0 }}
+                    </div>
+
+                    <div class="label">
+                        Employees with Penalties
+                    </div>
+
+                    <div class="sub">
+                        this cycle
+                    </div>
+
                 </div>
+
+
+                {{-- CL TO DEDUCT --}}
                 <div class="summary-card">
-                    <div class="number">{{ $summary['cl_to_deduct'] }}</div>
-                    <div class="label">Casual Leave to Deduct</div>
-                    <div class="sub">day(s)</div>
+
+                    <div class="number">
+                        {{ $summary['cl_to_deduct'] ?? 0 }}
+                    </div>
+
+                    <div class="label">
+                        Casual Leave to Deduct
+                    </div>
+
+                    <div class="sub">
+                        day(s)
+                    </div>
+
                 </div>
+
+
+                {{-- SALARY DEDUCTIONS --}}
                 <div class="summary-card">
-                    <div class="number">{{ $summary['salary_deductions'] }}</div>
-                    <div class="label">Salary-Day Deductions</div>
-                    <div class="sub">where CL insufficient</div>
+
+                    <div class="number">
+                        {{ $summary['salary_deductions'] ?? 0 }}
+                    </div>
+
+                    <div class="label">
+                        Salary-Day Deductions
+                    </div>
+
+                    <div class="sub">
+                        where CL insufficient
+                    </div>
+
                 </div>
+
+
+                {{-- WAIVERS --}}
                 <div class="summary-card">
-                    <div class="number">{{ $summary['waivers_pending'] }}</div>
-                    <div class="label">Waivers Pending</div>
-                    <div class="sub">awaiting review</div>
+
+                    <div class="number">
+                        {{ $summary['waivers_pending'] ?? 0 }}
+                    </div>
+
+                    <div class="label">
+                        Waivers Pending
+                    </div>
+
+                    <div class="sub">
+                        awaiting review
+                    </div>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
 
-    <!-- PENALTY SUMMARY TABLE                      -->
 
+    {{-- =========================================================
+    PENALTY SUMMARY TABLE
+    ========================================================== --}}
     <div class="row" style="margin-top: 16px;">
+
         <div class="col-12">
+
             <div class="glass-card">
 
+                {{-- TABLE HEADER --}}
                 <div class="section-header">
+
                     <div>
-                        <h6>Penalty Summary</h6>
-                        <span class="subtitle">{{ count($employees) }} employee ·
-                            {{ \Carbon\Carbon::parse($from)->format('d M Y') }} –
-                            {{ \Carbon\Carbon::parse($to)->format('d M Y') }}</span>
+
+                        <h6>
+                            Penalty Summary
+                        </h6>
+
+                        <span class="subtitle">
+
+                            {{ count($employees) }}
+                            {{ count($employees) == 1 ? 'employee' : 'employees' }}
+
+                            ·
+
+                            {{ \Carbon\Carbon::parse($from)->format('d M Y') }}
+
+                            –
+
+                            {{ \Carbon\Carbon::parse($to)->format('d M Y') }}
+
+                        </span>
+
                     </div>
+
                 </div>
 
+
+                {{-- TABLE --}}
                 <div class="table-wrap">
+
                     <table>
+
                         <thead>
+
                             <tr>
-                                <th>Employee</th>
-                                <th>Dept</th>
-                                <th>Late</th>
-                                <th>Half-Days</th>
-                                <th>Waivers</th>
-                                <th>CL Due</th>
-                                <th>CL Balance</th>
-                                <th>CL Deducted</th>
-                                <th>Salary Days</th>
+
+                                <th>
+                                    Employee
+                                </th>
+
+                                <th>
+                                    Dept
+                                </th>
+
+                                <th>
+                                    Late
+                                </th>
+
+                                <th>
+                                    Early Out
+                                </th>
+
+                                <th>
+                                    Half-Days
+                                </th>
+
+                                <th>
+                                    Absent
+                                </th>
+
+                                <th>
+                                    Waivers
+                                </th>
+
+                                <th>
+                                    CL Due
+                                </th>
+
+                                <th>
+                                    CL Balance
+                                </th>
+
+                                <th>
+                                    CL Deducted
+                                </th>
+
+                                <th>
+                                    Salary Days
+                                </th>
+
                             </tr>
+
                         </thead>
+
+
                         <tbody>
+
                             @forelse($employees as $emp)
+
                                 <tr>
+
+                                    {{-- EMPLOYEE --}}
                                     <td>
-                                        <strong>{{ $emp['employee'] }}</strong>
+
+                                        <span class="employee-name">
+                                            {{ $emp['employee'] }}
+                                        </span>
+
                                         <br>
-                                        <span style="font-size:11px; color:var(--text-muted);">{{ $emp['id'] }}</span>
+
+                                        <span class="employee-id">
+                                            {{ $emp['id'] }}
+                                        </span>
+
                                     </td>
-                                    <td>{{ $emp['dept'] }}</td>
-                                    <td>{{ $emp['late'] }}</td>
-                                    <td>{{ $emp['half_days'] }}</td>
+
+
+                                    {{-- DEPARTMENT --}}
                                     <td>
+                                        {{ $emp['dept'] }}
+                                    </td>
+
+
+                                    {{-- LATE --}}
+                                    <td>
+                                        {{ $emp['late'] }}
+                                    </td>
+
+
+                                    {{-- EARLY OUT --}}
+                                    <td>
+                                        {{ $emp['early_out'] }}
+                                    </td>
+
+
+                                    {{-- HALF DAYS --}}
+                                    <td>
+                                        {{ $emp['half_days'] }}
+                                    </td>
+
+
+                                    {{-- ABSENT --}}
+                                    <td>
+                                        {{ $emp['absent'] }}
+                                    </td>
+
+
+                                    {{-- WAIVERS --}}
+                                    <td>
+
                                         @if($emp['waivers'] === 'Pending')
-                                            <span class="badge-waiver-pending">Pending</span>
+
+                                            <span class="badge-waiver-pending">
+                                                Pending
+                                            </span>
+
                                         @else
+
                                             {{ $emp['waivers'] }}
+
                                         @endif
+
                                     </td>
-                                    <td>{{ $emp['cl_due'] }}</td>
-                                    <td>{{ $emp['cl_balance'] }}</td>
-                                    <td>{{ $emp['cl_deducted'] }}</td>
-                                    <td>{{ $emp['salary_days'] }}</td>
+
+
+                                    {{-- CL DUE --}}
+                                    <td>
+                                        {{ $emp['cl_due'] }}
+                                    </td>
+
+
+                                    {{-- CL BALANCE --}}
+                                    <td>
+                                        {{ $emp['cl_balance'] }}
+                                    </td>
+
+
+                                    {{-- CL DEDUCTED --}}
+                                    <td>
+                                        {{ $emp['cl_deducted'] }}
+                                    </td>
+
+
+                                    {{-- SALARY DAYS --}}
+                                    <td>
+                                        {{ $emp['salary_days'] }}
+                                    </td>
+
                                 </tr>
+
                             @empty
+
+                                {{-- NO RECORDS --}}
                                 <tr>
-                                    <td colspan="9">
+
+                                    <td colspan="10">
+
                                         <div class="empty-state">
+
                                             <i class="bi bi-inbox"></i>
-                                            <p>No records found.</p>
+
+                                            <p>
+                                                No penalty records found
+                                                for the selected filters.
+                                            </p>
+
                                         </div>
+
                                     </td>
+
                                 </tr>
+
                             @endforelse
+
                         </tbody>
+
                     </table>
+
                 </div>
 
             </div>
+
         </div>
+
     </div>
 
 
-    <!-- INFO FOOTER                               -->
-
+    {{-- =========================================================
+    INFORMATION BOX
+    ========================================================== --}}
     <div class="row" style="margin-top: 16px;">
+
         <div class="col-12">
+
             <div class="info-box">
+
                 <i class="bi bi-info-circle"></i>
-                <strong>How penalties work:</strong>
-                Every 3 late arrivals in a cycle equal 1 Casual Leave (the first 2 carry no penalty);
-                every 2 half-days equal 1 Casual Leave. Where the Casual Leave balance is insufficient,
-                the shortfall is a salary-day deduction. Waivers are reviewed under Approvals;
-                approved items are removed from the penalty count. Evaluated per attendance cycle;
-                payroll applies the resulting deductions.
+
+                <strong>
+                    How penalties work:
+                </strong>
+
+                Every <strong>{{ $thresholds['late'] ?? 3 }} late arrivals</strong> or <strong>{{ $thresholds['early_out'] ?? 3 }} early outs</strong>
+                in a cycle equal <strong>½ Casual Leave (half day)</strong>, and every
+
+                <strong>{{ $thresholds['half_day'] ?? 2 }} half-days</strong> equal <strong>1 Casual Leave</strong>,
+                @if (($thresholds['absent'] ?? 0) > 0)
+                    and every <strong>{{ $thresholds['absent'] }} absent {{ $thresholds['absent'] == 1 ? 'day' : 'days' }}</strong> (no punch, no leave) equal <strong>1 Casual Leave</strong>,
+                @endif
+
+                deducted automatically as soon as the limit is reached
+
+                @unless ($penaltyEnabled) (currently <strong>switched off</strong> in the Attendance Policy) @endunless.
+
+                Where the Casual Leave balance is insufficient, the shortfall is a <strong>salary-day deduction</strong>.
+
+                Waivers are reviewed under Approvals; once approved, the item stops counting and the deducted leave is returned.
+
+                Days covered by approved leave are not counted.
+
             </div>
+
         </div>
+
     </div>
 
 @endsection
+
+
+@push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const filterForm = document.getElementById('filterForm');
+            const fromInput = document.getElementById('filterFrom');
+            const toInput = document.getElementById('filterTo');
+
+            if (!filterForm || !fromInput || !toInput) {
+                return;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Validate Date Range
+            |--------------------------------------------------------------------------
+            */
+
+            filterForm.addEventListener('submit', function (event) {
+
+                if (
+                    fromInput.value &&
+                    toInput.value &&
+                    fromInput.value > toInput.value
+                ) {
+
+                    event.preventDefault();
+
+                    alert('The "From" date cannot be after the "To" date.');
+
+                    fromInput.focus();
+                }
+
+            });
+
+        });
+    </script>
+@endpush

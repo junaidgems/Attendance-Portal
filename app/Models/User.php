@@ -40,4 +40,41 @@ class User extends Authenticatable
     {
         return $this->hasOne(Employee::class);
     }
+
+    /**
+     * Role key => dashboard route. The single source for role-based redirects.
+     */
+    public const DASHBOARD_ROUTES = [
+        'administrator' => 'admin.dashboard',
+        'director' => 'director.dashboard',
+        'manager' => 'manager.dashboard',
+        'line_manager' => 'line_manager.dashboard',
+        'employee' => 'employee.dashboard',
+    ];
+
+    /**
+     * Lower-cased role name from the database, e.g. "Line_manager" → "line_manager".
+     */
+    public function roleKey(): string
+    {
+        return strtolower((string) $this->role?->name);
+    }
+
+    public function hasRole(string ...$roles): bool
+    {
+        return in_array($this->roleKey(), array_map('strtolower', $roles), true);
+    }
+
+    public function isActive(): bool
+    {
+        return strtolower((string) ($this->status ?? 'active')) === 'active';
+    }
+
+    /**
+     * Dashboard route for this user's role, or null when the role is unknown.
+     */
+    public function dashboardRoute(): ?string
+    {
+        return self::DASHBOARD_ROUTES[$this->roleKey()] ?? null;
+    }
 }

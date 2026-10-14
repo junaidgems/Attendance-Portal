@@ -4,14 +4,12 @@
 @section('page-title', 'Biometric Sync')
 
 @push('styles')
-   <link rel="stylesheet" href="{{ asset('css/biometric.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/biometric.css') }}">
 @endpush
 
 @section('content')
 
-    <!-- ========================================== -->
     <!-- DEVICE INFO CARD                          -->
-    <!-- ========================================== -->
     <div class="row">
         <div class="col-12">
             <div class="glass-card">
@@ -31,27 +29,78 @@
                     </div>
                     <div class="info-item">
                         <div class="label">Scheduled daily sync</div>
-                        <div class="value">18:30</div>
+                        <div class="value">{{ $scheduledSyncTime }}</div>
                     </div>
                     <div class="info-item">
                         <div class="label">Enrolled employees</div>
-                        <div class="value">1</div>
+                        <div class="value">{{ $enrolledCount }}</div>
                     </div>
                     <div class="info-item">
                         <div class="label">Last manual pull</div>
-                        <div class="value">20 Jul 13:54</div>
+                        <div class="value">{{ $lastManualPull }}</div>
                     </div>
                 </div>
 
                 <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:center;">
-                    <button class="btn-primary-glass" onclick="alert('Sync started! Pulling punch logs...')">
-                        <i class="bi bi-arrow-repeat"></i> Run sync now
+                    <button id="syncNowBtn" class="btn-primary-glass" onclick="runDeviceSync()">
+                        <i class="bi bi-arrow-repeat"></i> <span id="syncBtnText">Run sync now</span>
                     </button>
-                    <span style="font-size:12px; color:var(--text-muted);">
-                        Simulates pulling today's punch logs from the device and mapping them to employee records by ID.
+                    <span id="syncStatusMsg" style="font-size:12px; color:var(--text-muted);">
+                        Pulls today's punch logs from the device and maps them to employee records by ID.
                         Already-recorded employees are skipped.
                     </span>
                 </div>
+
+                <!-- DEVICE CLOCK -->
+                <div class="info-grid" style="margin-top:16px;">
+                    <div class="info-item">
+                        <div class="label">Device time</div>
+                        <div class="value" id="deviceClockDevice">
+                            <button type="button" class="btn-outline-glass" onclick="checkDeviceClock()"><i class="bi bi-search"></i> Check device clock</button>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Our time (Pakistan)</div>
+                        <div class="value" id="deviceClockOffice">—</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="label">Difference</div>
+                        <div class="value" id="deviceClockDiff">—</div>
+                    </div>
+                    <div class="info-item" style="display:flex; align-items:center;">
+                        <form method="POST" action="{{ route('admin.biometric.device-clock') }}" style="margin:0;"
+                            onsubmit="return confirm('Set the device clock to our time (Pakistan) now?');">
+                            @csrf
+                            <button type="submit" class="btn-outline-glass"><i class="bi bi-clock"></i> Set device clock</button>
+                        </form>
+                    </div>
+                </div>
+                <p style="font-size:12px; color:var(--text-muted); margin:8px 0 0;">
+                    <i class="bi bi-info-circle"></i> The device clock is only read or set when you press these buttons (reading or
+                    setting it makes the device show "Authentication failure" on its screen for a moment). The automatic sync never touches it.
+                </p>
+
+                <script>
+                    // Device time is only read on request: every read shows "Authentication failure" on the device screen
+                    function checkDeviceClock() {
+                        document.getElementById('deviceClockDevice').textContent = 'Checking…';
+                        fetch(@json(route('admin.biometric.device-clock.status')), { headers: { 'Accept': 'application/json' } })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (!data.success) {
+                                    document.getElementById('deviceClockDevice').innerHTML = '<span style="color:#b91c1c;">Not answering</span>';
+                                    return;
+                                }
+                                document.getElementById('deviceClockDevice').textContent = data.device;
+                                document.getElementById('deviceClockOffice').textContent = data.office;
+                                document.getElementById('deviceClockDiff').innerHTML = '<span style="display:inline-block; padding:3px 10px; border-radius:20px; font-size:12px; font-weight:600; '
+                                    + (data.ok ? 'background:#dcfce7; color:#15803d;' : 'background:#fee2e2; color:#b91c1c;') + '">' + data.difference + '</span>';
+                            })
+                            .catch(() => {
+                                document.getElementById('deviceClockDevice').innerHTML = '<span style="color:#b91c1c;">Not answering</span>';
+                            });
+                    }
+                </script>
 
             </div>
         </div>
@@ -67,21 +116,21 @@
                 <div class="section-header">
                     <div>
                         <h6>Today's Sync Status</h6>
-                        <span class="subtitle">Mon 20 Jul</span>
+                        <span class="subtitle">{{ now()->format('D d M') }}</span>
                     </div>
                 </div>
 
                 <div class="sync-status-grid">
                     <div class="sync-status-item">
-                        <div class="number" style="color:#059669;">1</div>
+                        <div class="number" style="color:#059669;">{{ $presentCount }}</div>
                         <div class="label">Present</div>
                     </div>
                     <div class="sync-status-item">
-                        <div class="number" style="color:#3b82f6;">1</div>
+                        <div class="number" style="color:#3b82f6;">{{ $mappedCount }}</div>
                         <div class="label">Mapped</div>
                     </div>
                     <div class="sync-status-item">
-                        <div class="number" style="color:#f59e0b;">0</div>
+                        <div class="number" style="color:#f59e0b;">{{ $awaitingCount }}</div>
                         <div class="label">Awaiting</div>
                     </div>
                 </div>
@@ -98,40 +147,32 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>
-                                    <span style="font-weight:600; color:var(--text-primary);">Junaid</span>
-                                    <br>
-                                    <span style="font-size:11px; color:var(--text-muted);">Frontend Developer</span>
-                                </td>
-                                <td><strong>GP-1002</strong></td>
-                                <td>09:19 - 18:00</td>
-                                <td><span class="status-badge-online" style="font-size:11px; padding:2px 12px;"><i
-                                            class="bi bi-check-circle-fill"></i> Mapped</span></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <span style="font-weight:600; color:var(--text-primary);">Faraz Siddiqui</span>
-                                    <br>
-                                    <span style="font-size:11px; color:var(--text-muted);">System Administrator</span>
-                                </td>
-                                <td><strong>GP-1001</strong></td>
-                                <td>09:05 - 17:30</td>
-                                <td><span class="status-badge-online" style="font-size:11px; padding:2px 12px;"><i
-                                            class="bi bi-check-circle-fill"></i> Mapped</span></td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <span style="font-weight:600; color:var(--text-primary);">John Doe</span>
-                                    <br>
-                                    <span style="font-size:11px; color:var(--text-muted);">Engineering Manager</span>
-                                </td>
-                                <td><strong>GP-1003</strong></td>
-                                <td>—</td>
-                                <td><span
-                                        style="background:#fef3c7; color:#d97706; padding:2px 12px; border-radius:12px; font-size:11px; font-weight:600; display:inline-block;"><i
-                                            class="bi bi-clock"></i> Awaiting</span></td>
-                            </tr>
+                            @forelse($employeeRows as $row)
+                                <tr>
+                                    <td>
+                                        <span style="font-weight:600; color:var(--text-primary);">{{ $row['name'] }}</span>
+                                        <br>
+                                        <span style="font-size:11px; color:var(--text-muted);">{{ $row['title'] }}</span>
+                                    </td>
+                                    <td><strong>{{ $row['emp_id'] }}</strong></td>
+                                    <td>{{ $row['device_record'] }}</td>
+                                    <td>
+                                        @if($row['status'] === 'Mapped')
+                                            <span class="status-badge-online" style="font-size:11px; padding:2px 12px;"><i
+                                                    class="bi bi-check-circle-fill"></i> Mapped</span>
+                                        @else
+                                            <span
+                                                style="background:#fef3c7; color:#d97706; padding:2px 12px; border-radius:12px; font-size:11px; font-weight:600; display:inline-block;"><i
+                                                    class="bi bi-clock"></i> Awaiting</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4" style="text-align:center; padding:20px;">Koi employee device se link nahi
+                                        hai.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -168,36 +209,18 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>20 Jul 13:54</td>
-                                <td><span class="status-badge-online" style="font-size:11px; padding:2px 12px;">Biometric
-                                        sync</span></td>
-                                <td>Pulled 1 new punch record(s) from BIO-KHI-01</td>
-                            </tr>
-                            <tr>
-                                <td>19 Jul 18:30</td>
-                                <td><span class="status-badge-online" style="font-size:11px; padding:2px 12px;">Scheduled
-                                        sync</span></td>
-                                <td>Pulled 0 new punch record(s) from BIO-KHI-01</td>
-                            </tr>
-                            <tr>
-                                <td>18 Jul 18:30</td>
-                                <td><span class="status-badge-online" style="font-size:11px; padding:2px 12px;">Scheduled
-                                        sync</span></td>
-                                <td>Pulled 0 new punch record(s) from BIO-KHI-01</td>
-                            </tr>
-                            <tr>
-                                <td>17 Jul 13:45</td>
-                                <td><span class="status-badge-online" style="font-size:11px; padding:2px 12px;">Manual
-                                        sync</span></td>
-                                <td>Pulled 3 new punch record(s) from BIO-KHI-01</td>
-                            </tr>
-                            <tr>
-                                <td>16 Jul 18:30</td>
-                                <td><span class="status-badge-online" style="font-size:11px; padding:2px 12px;">Scheduled
-                                        sync</span></td>
-                                <td>Pulled 0 new punch record(s) from BIO-KHI-01</td>
-                            </tr>
+                            @forelse($syncLogs as $log)
+                                <tr>
+                                    <td>{{ \Carbon\Carbon::parse($log->created_at)->format('d M H:i') }}</td>
+                                    <td><span class="status-badge-online"
+                                            style="font-size:11px; padding:2px 12px;">{{ $log->action }}</span></td>
+                                    <td>{{ $log->detail }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="3" style="text-align:center; padding:20px;">Koi sync activity nahi mili.</td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
                 </div>
@@ -205,5 +228,52 @@
             </div>
         </div>
     </div>
+    @push('scripts')
+        <script>
+            function runDeviceSync() {
+                const btn = document.getElementById('syncNowBtn');
+                const btnText = document.getElementById('syncBtnText');
+                const statusMsg = document.getElementById('syncStatusMsg');
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
+                // Button disable karo aur loading state dikhao
+                btn.disabled = true;
+                btn.style.opacity = '0.7';
+                btnText.textContent = 'Syncing...';
+                statusMsg.textContent = 'Fetching data from device...';
+                statusMsg.style.color = 'var(--text-muted)';
+
+                fetch('{{ route("admin.biometric.sync.run") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            statusMsg.textContent = data.message;
+                            statusMsg.style.color = '#059669';
+                            // Reload so the new data shows in the table
+                            setTimeout(() => location.reload(), 1200);
+                        } else {
+                            statusMsg.textContent = data.message || 'Sync failed. Please try again.';
+                            statusMsg.style.color = '#dc2626';
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                            btnText.textContent = 'Run sync now';
+                        }
+                    })
+                    .catch(err => {
+                        statusMsg.textContent = 'Network error: ' + err.message;
+                        statusMsg.style.color = '#dc2626';
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btnText.textContent = 'Run sync now';
+                    });
+            }
+        </script>
+    @endpush
 @endsection

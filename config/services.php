@@ -35,4 +35,10 @@ return [
         ],
     ],
 
+    // Biometric device: false on a server that cannot reach the device (e.g. the hosted portal,
+    // when an office PC on the device's network runs the sync)
+    'zkteco' => [
+        'sync_enabled' => env('ZKTECO_SYNC_ENABLED', true),
+    ],
+
 ];

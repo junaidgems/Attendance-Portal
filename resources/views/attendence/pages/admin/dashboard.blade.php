@@ -11,33 +11,32 @@
 
     <!-- STATS CARDS                               -->
     <div class="stat-grid">
-        <a href="{{ url('/attendance/filter?type=headcount') }}" class="stat-card" style="text-decoration:none;">
+        <a href="javascript:void(0)" class="stat-card" style="text-decoration:none;">
             <span class="stat-icon"><i class="bi bi-people"></i></span>
-            <div class="stat-number">156</div>
+            <div class="stat-number">{{ $headcount }}</div>
             <div class="stat-label">Headcount</div>
-            <div class="stat-sub">142 staff + 14 admin · live from devices</div>
+            <div class="stat-sub">{{ $staffCount }} staff + {{ $adminCount }} admin · live from devices</div>
         </a>
-        <a href="{{ url('/attendance/filter?type=present') }}" class="stat-card" style="text-decoration:none;">
+        <a href="javascript:void(0)" class="stat-card" style="text-decoration:none;">
             <span class="stat-icon"><i class="bi bi-person-check"></i></span>
-            <div class="stat-number">89</div>
+            <div class="stat-number">{{ $inOfficeNow }}</div>
             <div class="stat-label">In Office Now</div>
-            <div class="stat-sub">live from devices · 82 on time</div>
+            <div class="stat-sub">live from devices · {{ $onTimeNow }} on time</div>
         </a>
-        <a href="{{ url('/attendance/filter?type=late') }}" class="stat-card" style="text-decoration:none;">
+        <a href="javascript:void(0)" class="stat-card" style="text-decoration:none;">
             <span class="stat-icon"><i class="bi bi-clock"></i></span>
-            <div class="stat-number">7</div>
+            <div class="stat-number">{{ $lateToday }}</div>
             <div class="stat-label">Late Today</div>
-            <div class="stat-sub">7 late · 0 absent</div>
+            <div class="stat-sub">{{ $lateToday }} late · {{ $absentToday }} absent</div>
         </a>
-        <a href="{{ url('/attendance/filter?type=corrections') }}" class="stat-card" style="text-decoration:none;">
+        <a href="javascript:void(0)" class="stat-card" style="text-decoration:none;">
             <span class="stat-icon"><i class="bi bi-pencil-square"></i></span>
-            <div class="stat-number">3</div>
+            <div class="stat-number">{{ $pendingCorrections }}</div>
             <div class="stat-label">Pending Corrections</div>
-            <div class="stat-sub">2 approved · 1 rejected</div>
+            <div class="stat-sub">{{ $approvedCorrections }} approved · {{ $rejectedCorrections }} rejected</div>
         </a>
     </div>
-
-    <!-- MODULE CARDS                              -->
+    <!-- MODULE CARDS   -->
     <div class="module-grid">
         <a href="{{ route('admin.employee') }}" class="module-card" style="text-decoration:none;">
             <div class="module-icon blue"><i class="bi bi-person-badge"></i></div>
@@ -85,80 +84,36 @@
                 <h6>Attendance by Department</h6>
                 <span class="badge-count">30-day rate</span>
             </div>
-            <div class="dept-item">
-                <span class="dept-name">Engineering</span>
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div class="dept-bar">
-                        <div class="fill" style="width:92%;"></div>
+            @forelse($deptStats as $d)
+                <div class="dept-item">
+                    <span class="dept-name">{{ $d['name'] }}</span>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <div class="dept-bar">
+                            <div class="fill" style="width:{{ $d['rate'] }}%;"></div>
+                        </div>
+                        <span class="dept-rate">{{ $d['rate'] }}%</span>
                     </div>
-                    <span class="dept-rate">92%</span>
                 </div>
-            </div>
-            <div class="dept-item">
-                <span class="dept-name">HR</span>
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div class="dept-bar">
-                        <div class="fill" style="width:85%;"></div>
-                    </div>
-                    <span class="dept-rate">85%</span>
-                </div>
-            </div>
-            <div class="dept-item">
-                <span class="dept-name">Finance</span>
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div class="dept-bar">
-                        <div class="fill" style="width:78%;"></div>
-                    </div>
-                    <span class="dept-rate">78%</span>
-                </div>
-            </div>
-            <div class="dept-item">
-                <span class="dept-name">Marketing</span>
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div class="dept-bar">
-                        <div class="fill" style="width:88%;"></div>
-                    </div>
-                    <span class="dept-rate">88%</span>
-                </div>
-            </div>
-            <div class="dept-item">
-                <span class="dept-name">Operations</span>
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <div class="dept-bar">
-                        <div class="fill" style="width:81%;"></div>
-                    </div>
-                    <span class="dept-rate">81%</span>
-                </div>
-            </div>
+            @empty
+                <p style="font-size:13px; color:var(--text-muted);">Koi department data nahi mila.</p>
+            @endforelse
         </div>
 
         <!-- Today's Exceptions -->
         <div class="panel">
             <div class="panel-header">
-                <h6>Today’s Exceptions</h6>
-                <span class="badge-count">Fri 17 Jul</span>
+                <h6>Today's Exceptions</h6>
+                <span class="badge-count">{{ now()->format('D d M') }}</span>
             </div>
-
-            <div class="notif-item">
-                <span class="notif-dot yellow"></span>
-                <span class="notif-text"><strong>John Doe</strong> · Late in (09:45)</span>
-                <span class="notif-time">15 min ago</span>
-            </div>
-            <div class="notif-item">
-                <span class="notif-dot yellow"></span>
-                <span class="notif-text"><strong>Jane Smith</strong> · Late in (09:30)</span>
-                <span class="notif-time">30 min ago</span>
-            </div>
-            <div class="notif-item">
-                <span class="notif-dot blue"></span>
-                <span class="notif-text"><strong>Mike Johnson</strong> · Leave (Approved)</span>
-                <span class="notif-time">1 hour ago</span>
-            </div>
-            <div class="notif-item">
-                <span class="notif-dot green"></span>
-                <span class="notif-text"><strong>Sarah Lee</strong> · Early out (Approved)</span>
-                <span class="notif-time">2 hours ago</span>
-            </div>
+            @forelse($exceptions as $e)
+                <div class="notif-item">
+                    <span class="notif-dot {{ $e['dot'] }}"></span>
+                    <span class="notif-text"><strong>{{ $e['name'] }}</strong> · {{ $e['text'] }}</span>
+                    <span class="notif-time">{{ $e['time'] }}</span>
+                </div>
+            @empty
+                <p style="font-size:13px; color:var(--text-muted);">No exception Today</p>
+            @endforelse
         </div>
 
     </div>
@@ -176,32 +131,32 @@
             <div class="monthly-grid">
                 <a href="{{ route('admin.attendance.breakdown', ['type' => 'missing-punch']) }}" class="stat-box"
                     style="text-decoration:none;">
-                    <div class="num">12</div>
+                    <div class="num">{{ $monthly['missing-punch'] }}</div>
                     <div class="label">Missing Punch</div>
                 </a>
                 <a href="{{ route('admin.attendance.breakdown', ['type' => 'half-day']) }}" class="stat-box"
                     style="text-decoration:none;">
-                    <div class="num">8</div>
+                    <div class="num">{{ $monthly['half-day'] }}</div>
                     <div class="label">Half Day</div>
                 </a>
                 <a href="{{ route('admin.attendance.breakdown', ['type' => 'early-out']) }}" class="stat-box"
                     style="text-decoration:none;">
-                    <div class="num">5</div>
+                    <div class="num">{{ $monthly['early-out'] }}</div>
                     <div class="label">Early Out</div>
                 </a>
                 <a href="{{ route('admin.attendance.breakdown', ['type' => 'absent']) }}" class="stat-box"
                     style="text-decoration:none;">
-                    <div class="num">3</div>
+                    <div class="num">{{ $monthly['absent'] }}</div>
                     <div class="label">Absent</div>
                 </a>
                 <a href="{{ route('admin.attendance.breakdown', ['type' => 'late']) }}" class="stat-box"
                     style="text-decoration:none;">
-                    <div class="num">9</div>
+                    <div class="num">{{ $monthly['late'] }}</div>
                     <div class="label">Late</div>
                 </a>
                 <a href="{{ route('admin.attendance.breakdown', ['type' => 'present']) }}" class="stat-box"
                     style="text-decoration:none;">
-                    <div class="num">89</div>
+                    <div class="num">{{ $monthly['present'] }}</div>
                     <div class="label">Present</div>
                 </a>
             </div>
@@ -211,24 +166,17 @@
         <div class="panel">
             <div class="panel-header">
                 <h6>Notifications</h6>
-                <span class="badge-count">3 new</span>
+                <span class="badge-count">{{ count($notifications) }} new</span>
             </div>
-
-            <div class="notif-item">
-                <span class="notif-dot blue"></span>
-                <span class="notif-text"><strong>Attendance Policy</strong> updated</span>
-                <span class="notif-time">5 min ago</span>
-            </div>
-            <div class="notif-item">
-                <span class="notif-dot green"></span>
-                <span class="notif-text"><strong>3 leave requests</strong> pending approval</span>
-                <span class="notif-time">10 min ago</span>
-            </div>
-            <div class="notif-item">
-                <span class="notif-dot yellow"></span>
-                <span class="notif-text"><strong>Biometric sync</strong> completed</span>
-                <span class="notif-time">1 hour ago</span>
-            </div>
+            @forelse($notifications as $n)
+                <div class="notif-item">
+                    <span class="notif-dot {{ $n['dot'] }}"></span>
+                    <span class="notif-text">{!! $n['text'] !!}</span>
+                    <span class="notif-time">{{ $n['time'] }}</span>
+                </div>
+            @empty
+                <p style="font-size:13px; color:var(--text-muted);">Koi naya notification nahi.</p>
+            @endforelse
         </div>
 
     </div>
